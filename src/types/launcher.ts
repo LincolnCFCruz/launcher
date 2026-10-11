@@ -63,7 +63,7 @@ export function settingsForEngine(s: Settings): EngineSettings {
 
 export type MinimapPlace = { name: string; x: number; y: number; spawn: string };
 
-// Not in the engine's answers yet; the mock answers with some of them.
+// What the launcher shows of an installed mod (the engine's InstalledMod).
 export interface InstalledMod {
   name: string;
   installed: number;
@@ -71,13 +71,9 @@ export interface InstalledMod {
   size: number;
 }
 
-export type ModsStatus = EngineModsStatus & { installed?: InstalledMod[] };
+export type ModsStatus = Omit<EngineModsStatus, 'installed'> & { installed?: InstalledMod[] };
 
 export type JoinCheck = EngineJoinCheck & { map?: string };
-
-interface LauncherOnly {
-  uninstallMod: { args: { name: string }; result: { uninstalled: string[] } };
-}
 
 interface Extended {
   mods: ModsStatus;
@@ -88,19 +84,9 @@ type EngineCommand = Exclude<Request['command']['case'], undefined | 'handshake'
 type Answer<C> = Extract<Response['answer'], { case: C }>['value'];
 type Init<C> = Extract<MessageInitShape<typeof RequestSchema>['command'], { case: C }>['value'];
 
-export type Command = EngineCommand | keyof LauncherOnly;
-export type CommandArgs<C extends Command> = C extends EngineCommand
-  ? Init<C>
-  : C extends keyof LauncherOnly
-    ? LauncherOnly[C]['args']
-    : never;
-export type CommandResult<C extends Command> = C extends keyof Extended
-  ? Extended[C]
-  : C extends EngineCommand
-    ? Answer<C>
-    : C extends keyof LauncherOnly
-      ? LauncherOnly[C]['result']
-      : never;
+export type Command = EngineCommand;
+export type CommandArgs<C extends Command> = Init<C>;
+export type CommandResult<C extends Command> = C extends keyof Extended ? Extended[C] : Answer<C>;
 
 export type EngineEvent = Exclude<Event['event'], { case: undefined }>;
 
@@ -108,4 +94,4 @@ export const ENGINE_COMMANDS = RequestSchema.oneofs[0].fields
   .map((f) => f.localName)
   .filter((c) => c !== 'handshake' && c !== 'shutdown') as EngineCommand[];
 
-export const COMMANDS: readonly Command[] = [...ENGINE_COMMANDS, 'uninstallMod'];
+export const COMMANDS: readonly Command[] = ENGINE_COMMANDS;

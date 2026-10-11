@@ -82,7 +82,7 @@ export function filterInstalled(mods: InstalledMod[], query: string): InstalledM
 }
 
 export const usedInPlace = (mod: InstalledMod) =>
-  mod.folders.length > 0 && mod.folders.every((f) => /^Archives[\\/]/i.test(f));
+  mod.folders.length > 0 && mod.folders.every((f) => /^Archives[\\/]|\.zip$/i.test(f));
 
 export const fileName = (path: string) => path.split(/[\\/]/).filter(Boolean).pop() ?? path;
 

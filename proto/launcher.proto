@@ -55,6 +55,7 @@ message Request {
     SaveServersArgs save_servers = 39;
     Empty version = 40;
     InstallUpdateArgs install_update = 41;
+    UninstallModArgs uninstall_mod = 42;
   }
 }
 
@@ -101,6 +102,7 @@ message Response {
     Empty save_servers = 39;
     EngineVersion version = 40;
     GameUpdate install_update = 41;
+    Uninstalled uninstall_mod = 42;
   }
 }
 
@@ -453,6 +455,23 @@ message ModsStatus {
   uint64 free_bytes = 7;
   repeated string cleaned = 8;
   repeated InstallProgress jobs = 9;
+  repeated InstalledMod installed = 10;
+}
+
+message InstalledMod {
+  string name = 1;
+  // unix seconds
+  double installed = 2;
+  repeated string folders = 3;
+  double size = 4;
+}
+
+message UninstallModArgs {
+  string name = 1;
+}
+
+message Uninstalled {
+  repeated string uninstalled = 1;
 }
 
 message ModinfoArgs {
@@ -966,6 +985,7 @@ message Controller {
   bool gamepad = 10;
   // the buttons held right now, by their place in `buttons`
   repeated uint32 pressed = 11;
+  optional string axis_mode = 12;
 }
 
 message ControllerList {
