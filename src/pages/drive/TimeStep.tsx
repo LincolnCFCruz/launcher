@@ -5,6 +5,7 @@ import { t } from '../../i18n';
 import {
   DEFAULT_CUSTOM,
   dateForSeason,
+  resolvedMetarStation,
   seasonOf,
   useDuty,
   type Choice,
@@ -21,7 +22,7 @@ function metarStationLabel(
   selected?: MetarStation,
   automatic?: MetarStation,
 ): string {
-  const station = choice.metar ? selected : automatic;
+  const station = resolvedMetarStation(choice, selected, automatic);
   const code = choice.metar || automatic?.icao || t('drive.weather.automatic');
   return station?.name ? `${code} · ${station.name}` : code;
 }
@@ -35,7 +36,7 @@ export function weatherLabel(
   if (choice.weather === '') return t('drive.weather.mapDefault');
   if (choice.weather === 'cycle') return t('drive.weather.cycle');
   if (choice.weather === 'metar') {
-    if (choice.metar && !selected)
+    if (choice.metar && !resolvedMetarStation(choice, selected))
       return t('drive.weather.metarUnavailable', { station: choice.metar });
     return t('drive.weather.metarAt', { station: metarStationLabel(choice, selected, automatic) });
   }
@@ -88,6 +89,11 @@ export const TimeStep: React.FC<{ data: DriveData }> = ({ data }) => {
   }
 
   const season = seasonOf(choice);
+  const resolvedStation = resolvedMetarStation(
+    choice,
+    data.selectedMetarStation,
+    data.automaticMetarStation,
+  );
   const presets = data.weather.filter((w) => fits(w, season));
   const options: [string, string, string, string][] = [
     ['', 'map', t('drive.weather.mapDefault'), t('drive.weather.mapDefaultHint')],
@@ -214,9 +220,9 @@ export const TimeStep: React.FC<{ data: DriveData }> = ({ data }) => {
                   })
                 : choice.metar.length < 4
                   ? t('drive.weather.stationEnter')
-                  : data.selectedMetarStation
+                  : resolvedStation
                     ? t('drive.weather.stationResolved', {
-                        station: metarStationLabel(choice, data.selectedMetarStation),
+                        station: metarStationLabel(choice, resolvedStation),
                       })
                     : t('drive.weather.stationUnavailable')}
             </p>

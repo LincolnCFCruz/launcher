@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { CommandArgs, ServerInfo } from '../types/launcher';
+import type { CommandArgs, MetarStation, ServerInfo } from '../types/launcher';
 
 export type Season = 'auto' | 'spring' | 'summer' | 'autumn' | 'winter';
 
@@ -185,10 +185,21 @@ export function encodeCustom(c: CustomWeather): string {
   ].join(';');
 }
 
+/** A lookup is usable only when it belongs to the ICAO currently entered by the player. */
+export function resolvedMetarStation(
+  choice: Choice,
+  selected?: MetarStation,
+  automatic?: MetarStation,
+): MetarStation | undefined {
+  if (!choice.metar) return automatic;
+  return selected?.icao.toUpperCase() === choice.metar ? selected : undefined;
+}
+
 export function toDuty(
   choice: Choice,
   profile: string,
   server: ServerInfo | null,
+  metarStation?: MetarStation,
 ): CommandArgs<'launch'> {
   const duty: CommandArgs<'launch'> = {
     map: choice.map,
@@ -208,11 +219,13 @@ export function toDuty(
     profile,
     season: choice.season === 'auto' ? undefined : choice.season,
     weather:
-      choice.weather === 'metar'
-        ? `metar-${choice.metarRefresh ? 'sync' : 'once'}:${choice.metar}`
-        : choice.weather === 'custom'
-          ? `custom:${encodeCustom(choice.custom)}`
-          : choice.weather,
+      choice.weather === 'metar' && metarStation
+        ? `metar-${choice.metarRefresh ? 'sync' : 'once'}:${metarStation.icao}`
+        : choice.weather === 'metar'
+          ? ''
+          : choice.weather === 'custom'
+            ? `custom:${encodeCustom(choice.custom)}`
+            : choice.weather,
   };
   if (!choice.free && choice.line) {
     duty.line = choice.line;

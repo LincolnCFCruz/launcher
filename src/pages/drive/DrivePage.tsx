@@ -3,7 +3,7 @@ import { Icon } from '../../components/Icon';
 import { Notice, Spinner } from '../../components/ui';
 import { t } from '../../i18n';
 import { call, errorText, useCommand, useEngine } from '../../lib/engine';
-import { seasonOf, toDuty, useDuty, type Choice } from '../../lib/duty';
+import { resolvedMetarStation, seasonOf, toDuty, useDuty, type Choice } from '../../lib/duty';
 import { contentName, duration, hhmm, lineLabel, longDate } from '../../lib/format';
 import { useNav, useToast } from '../../lib/nav';
 import type {
@@ -613,11 +613,20 @@ function Launch({ data }: { data: DriveData }) {
   const p = picked(data, choice);
   const running = instances.filter((i) => i.running).length;
   const busy = starting || loading !== null;
+  const metarStation = resolvedMetarStation(
+    choice,
+    data.selectedMetarStation,
+    data.automaticMetarStation,
+  );
 
   const launch = async (situation?: string) => {
     if (busy) return;
     if (!choice.bus || !choice.map) {
       toast(t('drive.start.chooseFirst'), 'caution');
+      return;
+    }
+    if (choice.weather === 'metar' && !metarStation) {
+      toast(t('drive.weather.stationUnavailable'), 'caution');
       return;
     }
     if (running > 0 && !armed && !situation) {
@@ -630,7 +639,7 @@ function Launch({ data }: { data: DriveData }) {
     setArmed(false);
     setStarting(true);
     try {
-      const args = toDuty(choice, config.data?.profile ?? '', server);
+      const args = toDuty(choice, config.data?.profile ?? '', server, metarStation);
       if (situation) Object.assign(args, { situation, lan: 'off' });
       const res = await call('launch', args);
       toast(t('drive.start.started', { pid: res.pid }), 'tip');
