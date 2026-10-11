@@ -100,6 +100,12 @@ function Showroom({
   );
 }
 
+export function selectedTrip(tour: LineInfo['tours'][number] | undefined, trip: string) {
+  if (!tour) return undefined;
+  if (trip === '') return tour.trips[0];
+  return tour.trips.find((candidate) => candidate.index === Number(trip)) ?? tour.trips[0];
+}
+
 function picked(data: DriveData, choice: Choice): Picked {
   const line = choice.free ? undefined : data.lines?.find((l) => l.name === choice.line);
   const tour = line?.tours.find((tr) => tr.number === choice.tour);
@@ -108,7 +114,7 @@ function picked(data: DriveData, choice: Choice): Picked {
     map: data.maps.find((m) => m.file === choice.map),
     line,
     tour,
-    trip: tour?.trips[choice.trip === '' ? 0 : Number(choice.trip)] ?? tour?.trips[0],
+    trip: selectedTrip(tour, choice.trip),
   };
 }
 
