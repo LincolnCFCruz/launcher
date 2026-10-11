@@ -96,7 +96,7 @@ export const ModsPage: React.FC = () => {
   };
 
   const counts: Record<Section, number | null> = {
-    installed: data ? data.installed.length : null,
+    installed: data ? data.inboxItems.length : null,
     installing: running || null,
     folders: null,
   };
@@ -183,7 +183,7 @@ export const ModsPage: React.FC = () => {
           ) : section === 'folders' ? (
             <Folders mods={data} onOpen={open} />
           ) : (
-            <Installed mods={data.installed} cleaned={data.cleaned} />
+            <Installed mods={data.installed} mounted={data.inboxItems} cleaned={data.cleaned} />
           )}
         </div>
       </PanelScreen>

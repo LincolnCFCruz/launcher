@@ -12,14 +12,19 @@ import type { InstalledMod } from '../../types/launcher';
 import { filterInstalled, usedInPlace } from './logic';
 import { Title } from './Title';
 
-export const Installed: React.FC<{ mods: InstalledMod[]; cleaned: string[] }> = ({
-  mods,
-  cleaned,
-}) => {
+export const Installed: React.FC<{
+  mods: InstalledMod[];
+  mounted: string[];
+  cleaned: string[];
+}> = ({ mods, mounted, cleaned }) => {
   const [query, setQuery] = useState('');
   const [removing, setRemoving] = useState<InstalledMod | null>(null);
   const toast = useToast();
   const shown = useMemo(() => filterInstalled(mods, query), [mods, query]);
+  const shownMounted = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return mounted.filter((name) => !q || name.toLowerCase().includes(q));
+  }, [mounted, query]);
 
   const uninstall = async (mod: InstalledMod) => {
     setRemoving(null);
@@ -35,7 +40,7 @@ export const Installed: React.FC<{ mods: InstalledMod[]; cleaned: string[] }> = 
     <>
       <Title
         action={
-          mods.length > 0 && (
+          (mods.length > 0 || mounted.length > 0) && (
             <SearchField value={query} onChange={setQuery} placeholder={t('mods.search')} />
           )
         }
@@ -52,37 +57,50 @@ export const Installed: React.FC<{ mods: InstalledMod[]; cleaned: string[] }> = 
         </Notice>
       )}
       <ListGroup>
-        {mods.length === 0 ? (
+        {mods.length === 0 && mounted.length === 0 ? (
           <ListRow label={t('mods.none')} hint={t('mods.noneHint')} />
-        ) : shown.length === 0 ? (
+        ) : shown.length === 0 && shownMounted.length === 0 ? (
           <ListRow label={t('mods.noMatch', { query: query.trim() })} />
         ) : (
-          shown.map((mod) => (
-            <div key={mod.name} className="list-row gap-4">
-              <span className="grid size-9 shrink-0 place-items-center text-muted">
-                <Icon name={usedInPlace(mod) ? 'folder_zip' : 'extension'} size={26} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-ink">{mod.name}</p>
-                <p className="truncate text-[14.5px] text-muted" title={mod.folders.join('\n')}>
-                  <span title={dateTime(mod.installed)}>{ago(mod.installed)}</span>
-                  {' · '}
-                  {bytes(mod.size)}
-                  {usedInPlace(mod) && ` · ${t('mods.inPlace')}`}
-                  {mod.folders.length > 0 && ` · ${mod.folders.join(', ')}`}
-                </p>
+          <>
+            {shown.map((mod) => (
+              <div key={mod.name} className="list-row gap-4">
+                <span className="grid size-9 shrink-0 place-items-center text-muted">
+                  <Icon name={usedInPlace(mod) ? 'folder_zip' : 'extension'} size={26} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-ink">{mod.name}</p>
+                  <p className="truncate text-[14.5px] text-muted" title={mod.folders.join('\n')}>
+                    <span title={dateTime(mod.installed)}>{ago(mod.installed)}</span>
+                    {' · '}
+                    {bytes(mod.size)}
+                    {usedInPlace(mod) && ` · ${t('mods.inPlace')}`}
+                    {mod.folders.length > 0 && ` · ${mod.folders.join(', ')}`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="theme-toggle shrink-0 rounded-full hover:text-danger"
+                  aria-label={t('mods.uninstall.label', { name: mod.name })}
+                  title={t('mods.uninstall.label', { name: mod.name })}
+                  onClick={() => setRemoving(mod)}
+                >
+                  <Icon name="delete" size={19} />
+                </button>
               </div>
-              <button
-                type="button"
-                className="theme-toggle shrink-0 rounded-full hover:text-danger"
-                aria-label={t('mods.uninstall.label', { name: mod.name })}
-                title={t('mods.uninstall.label', { name: mod.name })}
-                onClick={() => setRemoving(mod)}
-              >
-                <Icon name="delete" size={19} />
-              </button>
-            </div>
-          ))
+            ))}
+            {shownMounted.map((name) => (
+              <div key={name} className="list-row gap-4">
+                <span className="grid size-9 shrink-0 place-items-center text-muted">
+                  <Icon name="extension" size={26} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-ink">{name}</p>
+                  <p className="truncate text-[14.5px] text-muted">{t('mods.mounted.active')}</p>
+                </div>
+              </div>
+            ))}
+          </>
         )}
       </ListGroup>
       {removing && (

@@ -15,11 +15,11 @@ export const Folders: React.FC<{ mods: Mods; onOpen: (path: string) => void }> =
   const filled = mods.folders.filter((f) => f.entries > 0n);
   const empty = mods.folders.filter((f) => f.entries === 0n).map((f) => f.folder);
   const [query, setQuery] = useState('');
-  const inbox = filterBy(mods.inboxItems, query, (item) => [item]);
+  const mounted = filterBy(mods.inboxItems, query, (item) => [item]);
   const waiting = filterBy(mods.waiting, query, (w) => [w]);
   const archives = filterBy(mods.archives, query, (a) => [a.name]);
   const total = mods.inboxItems.length + mods.waiting.length + mods.archives.length;
-  const matches = inbox.length + waiting.length + archives.length;
+  const matches = mounted.length + waiting.length + archives.length;
 
   return (
     <>
@@ -33,9 +33,9 @@ export const Folders: React.FC<{ mods: Mods; onOpen: (path: string) => void }> =
         {t('mods.sections.folders')}
       </Title>
 
-      <ListGroup title={t('mods.inbox.title')} hint={t('mods.inbox.hint')}>
+      <ListGroup title={t('mods.mounted.title')} hint={t('mods.mounted.hint')}>
         <ListRow
-          label={t('mods.inbox.folder')}
+          label={t('mods.mounted.folder')}
           hint={<span className="block truncate select-text">{mods.inbox || '–'}</span>}
         >
           <button
@@ -48,8 +48,8 @@ export const Folders: React.FC<{ mods: Mods; onOpen: (path: string) => void }> =
             {t('mods.open')}
           </button>
         </ListRow>
-        {inbox.map((item) => (
-          <ItemRow key={item} icon="hourglass_top" label={item} hint={t('mods.inbox.settling')} />
+        {mounted.map((item) => (
+          <ItemRow key={item} icon="extension" label={item} hint={t('mods.mounted.active')} />
         ))}
       </ListGroup>
 

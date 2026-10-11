@@ -90,11 +90,11 @@
     "empty": "Leer: {names}",
     "none": "Noch keine Ordner"
   },
-  "inbox": {
-    "title": "Mods-Eingang",
-    "hint": "Alles, was du hier hineinlegst, installiert sich von selbst.",
-    "folder": "Eingangsordner",
-    "settling": "Wird installiert, sobald es fertig kopiert ist"
+  "mounted": {
+    "title": "Eingebundene Mods",
+    "hint": "Ordner und ZIP-Dateien hier stehen neoOMSI sofort zur Verfügung.",
+    "folder": "Mods-Ordner",
+    "active": "Für neoOMSI verfügbar"
   },
   "waiting": {
     "title": "Warten auf ihren Bus",

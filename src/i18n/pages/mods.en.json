@@ -90,11 +90,11 @@
     "empty": "Empty: {names}",
     "none": "No folders yet"
   },
-  "inbox": {
-    "title": "Mods inbox",
-    "hint": "Anything you put in here installs by itself.",
-    "folder": "Inbox folder",
-    "settling": "Installs once it has finished copying"
+  "mounted": {
+    "title": "Mounted mods",
+    "hint": "Folders and ZIP files here are available to neoOMSI immediately.",
+    "folder": "Mods folder",
+    "active": "Available to neoOMSI"
   },
   "waiting": {
     "title": "Waiting for their bus",
