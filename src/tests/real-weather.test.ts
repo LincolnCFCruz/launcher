@@ -23,6 +23,7 @@ const choice = (patch: Partial<Choice> = {}): Choice => ({
   schedule: true,
   autostart: false,
   onFoot: false,
+  lan: 'off',
   weather: 'metar',
   metar: 'EGNX',
   metarRefresh: false,
