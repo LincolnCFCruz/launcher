@@ -5041,4 +5041,3 @@ export enum SessionState {
  */
 export const SessionStateSchema: GenEnum<SessionState> = /*@__PURE__*/
   enumDesc(file_launcher, 18);
-
