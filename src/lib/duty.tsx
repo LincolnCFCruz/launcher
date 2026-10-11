@@ -45,6 +45,7 @@ export interface Choice {
   schedule: boolean;
   autostart: boolean;
   onFoot: boolean;
+  lan: 'off' | 'host';
   weather: string;
   metar: string;
   custom: CustomWeather;
@@ -86,6 +87,7 @@ const DEFAULT_CHOICE: Choice = {
   schedule: true,
   autostart: false,
   onFoot: false,
+  lan: 'off',
   weather: '',
   metar: 'EDDB',
   custom: DEFAULT_CUSTOM,
@@ -216,5 +218,6 @@ export function toDuty(
     duty.trip = choice.trip || undefined;
   }
   if (server) duty.lan = `join:${server.address}`;
+  else if (choice.lan === 'host') duty.lan = 'host';
   return duty;
 }

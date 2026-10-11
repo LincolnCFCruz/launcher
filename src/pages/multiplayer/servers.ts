@@ -79,13 +79,10 @@ export const removeServer = (servers: ServerInfo[], address: string): ServerEntr
 export const joinTarget = (text: string, answer: string): ServerInfo =>
   create(ServerInfoSchema, { address: text.trim(), name: text.trim(), motd: answer });
 
-type WithLan = Choice & { lan?: 'host' | 'off' };
-
-export const isHosting = (choice: Choice) => (choice as WithLan).lan === 'host';
+export const isHosting = (choice: Choice) => choice.lan === 'host';
 
 export function hostingPatch(on: boolean): Partial<Choice> {
-  const patch: Partial<WithLan> = { lan: on ? 'host' : 'off' };
-  return patch;
+  return { lan: on ? 'host' : 'off' };
 }
 
 export function sortServers(servers: ServerInfo[]): ServerInfo[] {

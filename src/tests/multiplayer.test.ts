@@ -13,7 +13,7 @@ import {
   resolveMap,
   serverTitle,
 } from '../pages/multiplayer/servers';
-import type { Choice } from '../lib/duty';
+import { toDuty, type Choice } from '../lib/duty';
 import { create, type MessageInitShape } from '@bufbuild/protobuf';
 import { ServerInfoSchema, type MapInfo } from '../types/launcher';
 
@@ -105,9 +105,17 @@ describe('joining and hosting', () => {
   });
 
   it('reads and writes the hosting flag on the duty', () => {
-    const choice = { map: '' } as Choice;
+    const choice = { map: '', lan: 'off' } as Choice;
     expect(isHosting(choice)).toBe(false);
     expect(isHosting({ ...choice, ...hostingPatch(true) })).toBe(true);
     expect(isHosting({ ...choice, ...hostingPatch(false) })).toBe(false);
+  });
+
+  it('starts a hosted session unless the player is joining a server', () => {
+    const choice = { map: 'Grundorf', lan: 'host' } as Choice;
+    expect(toDuty(choice, 'Default', null).lan).toBe('host');
+    expect(toDuty(choice, 'Default', server({ address: 'play.neoomsi.org' })).lan).toBe(
+      'join:play.neoomsi.org',
+    );
   });
 });
