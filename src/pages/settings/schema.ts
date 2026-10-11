@@ -662,12 +662,6 @@ export const TABS: readonly Tab[] = [
         id: 'timeWeather',
         rows: [
           toggle('time_sync', { hint: true }),
-          toggle('metar_sync', { hint: true }),
-          custom('metar_station', 'metarStation', {
-            visible: on('metar_sync'),
-            hint: true,
-            writes: ['metar_station'],
-          }),
           select('time_speed', [[1, 'opt.realTime'], ...n('fmt.speed', [2, 4, 8, 15, 30])], {
             hint: true,
           }),

@@ -6,7 +6,14 @@ import { call, errorText, useCommand, useEngine } from '../../lib/engine';
 import { seasonOf, toDuty, useDuty, type Choice } from '../../lib/duty';
 import { contentName, duration, hhmm, lineLabel, longDate } from '../../lib/format';
 import { useNav, useToast } from '../../lib/nav';
-import type { LineInfo, MapInfo, TripInfo, VehicleInfo, WeatherInfo } from '../../types/launcher';
+import type {
+  LineInfo,
+  MapInfo,
+  MetarStation,
+  TripInfo,
+  VehicleInfo,
+  WeatherInfo,
+} from '../../types/launcher';
 import { OverflowLabel } from '../../components/OverflowLabel';
 import { BusStep } from './BusStep';
 import { BusViewer } from './BusViewer';
@@ -25,6 +32,8 @@ export interface DriveData {
   maps: MapInfo[];
   vehicles: VehicleInfo[];
   weather: WeatherInfo[];
+  automaticMetarStation?: MetarStation;
+  selectedMetarStation?: MetarStation;
   lines: LineInfo[] | undefined;
 }
 
@@ -133,7 +142,10 @@ export const DrivePage: React.FC = () => {
   const { choice, update } = useDuty();
   const maps = useCommand('maps');
   const vehicles = useCommand('vehicles');
-  const weather = useCommand('weather');
+  const weather = useCommand('weather', {
+    map: choice.map,
+    metarIcao: choice.metar.length === 4 ? choice.metar : undefined,
+  });
   const lines = useCommand('lines', choice.map ? { map: choice.map, date: choice.date } : null);
   const mapList = maps.data?.maps;
   const busList = vehicles.data?.vehicles;
@@ -167,7 +179,14 @@ export const DrivePage: React.FC = () => {
   const error = maps.error || vehicles.error || weather.error;
   const data: DriveData | null =
     mapList && busList && weather.data
-      ? { maps: mapList, vehicles: busList, weather: weather.data.weather, lines: lineList }
+      ? {
+          maps: mapList,
+          vehicles: busList,
+          weather: weather.data.weather,
+          automaticMetarStation: weather.data.automaticMetarStation,
+          selectedMetarStation: weather.data.selectedMetarStation,
+          lines: lineList,
+        }
       : null;
 
   return (
@@ -250,7 +269,9 @@ function Home({
     [
       'time',
       server ? t('drive.summary.serverClock') : `${choice.time} · ${longDate(choice.date)}`,
-      server ? server.weather : weatherLabel(choice, data.weather),
+      server
+        ? server.weather
+        : weatherLabel(choice, data.weather, data.selectedMetarStation, data.automaticMetarStation),
     ],
     [
       'roadbook',
@@ -488,7 +509,7 @@ function TimeVisual({ data }: { data: DriveData }) {
           size={26}
           style={{ color: 'var(--accent)' }}
         />
-        {weatherLabel(choice, data.weather)}
+        {weatherLabel(choice, data.weather, data.selectedMetarStation, data.automaticMetarStation)}
       </p>
     </div>
   );

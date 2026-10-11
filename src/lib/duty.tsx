@@ -48,6 +48,7 @@ export interface Choice {
   lan: 'off' | 'host';
   weather: string;
   metar: string;
+  metarRefresh: boolean;
   custom: CustomWeather;
 }
 
@@ -89,7 +90,8 @@ const DEFAULT_CHOICE: Choice = {
   onFoot: false,
   lan: 'off',
   weather: '',
-  metar: 'EDDB',
+  metar: '',
+  metarRefresh: false,
   custom: DEFAULT_CUSTOM,
 };
 
@@ -207,7 +209,7 @@ export function toDuty(
     season: choice.season === 'auto' ? undefined : choice.season,
     weather:
       choice.weather === 'metar'
-        ? `metar:${choice.metar}`
+        ? `metar-${choice.metarRefresh ? 'sync' : 'once'}:${choice.metar}`
         : choice.weather === 'custom'
           ? `custom:${encodeCustom(choice.custom)}`
           : choice.weather,

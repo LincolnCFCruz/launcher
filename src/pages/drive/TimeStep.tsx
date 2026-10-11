@@ -11,15 +11,34 @@ import {
   type CustomWeather,
   type Season,
 } from '../../lib/duty';
-import type { WeatherInfo } from '../../types/launcher';
+import type { MetarStation, WeatherInfo } from '../../types/launcher';
 import type { DriveData } from './DrivePage';
 
 const SEASONS: Season[] = ['auto', 'spring', 'summer', 'autumn', 'winter'];
 
-export function weatherLabel(choice: Choice, presets: WeatherInfo[]): string {
+function metarStationLabel(
+  choice: Choice,
+  selected?: MetarStation,
+  automatic?: MetarStation,
+): string {
+  const station = choice.metar ? selected : automatic;
+  const code = choice.metar || automatic?.icao || t('drive.weather.automatic');
+  return station?.name ? `${code} · ${station.name}` : code;
+}
+
+export function weatherLabel(
+  choice: Choice,
+  presets: WeatherInfo[],
+  selected?: MetarStation,
+  automatic?: MetarStation,
+): string {
   if (choice.weather === '') return t('drive.weather.mapDefault');
   if (choice.weather === 'cycle') return t('drive.weather.cycle');
-  if (choice.weather === 'metar') return t('drive.weather.metarAt', { station: choice.metar });
+  if (choice.weather === 'metar') {
+    if (choice.metar && !selected)
+      return t('drive.weather.metarUnavailable', { station: choice.metar });
+    return t('drive.weather.metarAt', { station: metarStationLabel(choice, selected, automatic) });
+  }
   if (choice.weather === 'custom') return t('drive.weather.custom');
   return presets.find((w) => w.file === choice.weather)?.name ?? choice.weather;
 }
@@ -171,16 +190,44 @@ export const TimeStep: React.FC<{ data: DriveData }> = ({ data }) => {
           ))}
         </div>
         {choice.weather === 'metar' && (
-          <div className="mt-5 max-w-56">
+          <div className="mt-5 max-w-sm space-y-3">
             <Field label={t('drive.weather.airport')}>
               <input
                 className="input font-mono uppercase"
                 maxLength={4}
                 placeholder="ICAO"
                 value={choice.metar}
-                onChange={(e) => update({ metar: e.target.value.toUpperCase() })}
+                onChange={(e) =>
+                  update({
+                    metar: e.target.value
+                      .replace(/[^a-z]/gi, '')
+                      .slice(0, 4)
+                      .toUpperCase(),
+                  })
+                }
               />
             </Field>
+            <p className="text-[14px] text-muted">
+              {!choice.metar
+                ? t('drive.weather.stationAutomatic', {
+                    station: metarStationLabel(choice, undefined, data.automaticMetarStation),
+                  })
+                : choice.metar.length < 4
+                  ? t('drive.weather.stationEnter')
+                  : data.selectedMetarStation
+                    ? t('drive.weather.stationResolved', {
+                        station: metarStationLabel(choice, data.selectedMetarStation),
+                      })
+                    : t('drive.weather.stationUnavailable')}
+            </p>
+            <label className="flex items-center justify-between gap-6 py-1 text-[15px]">
+              <span>{t('drive.weather.keepUpdated')}</span>
+              <Switch
+                checked={choice.metarRefresh}
+                onChange={(metarRefresh) => update({ metarRefresh })}
+              />
+            </label>
+            <p className="text-[14px] text-muted">{t('drive.weather.keepUpdatedHint')}</p>
           </div>
         )}
         {choice.weather === 'custom' && <CustomEditor />}
