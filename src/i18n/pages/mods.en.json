@@ -22,6 +22,7 @@
     "of": "{n} of {total}",
     "reading": "Looking inside…",
     "failed": "Could not look inside",
+    "retry": "Try again",
     "archive": "Archive",
     "unpacked": "Unpacked",
     "files": "Files",

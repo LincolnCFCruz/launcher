@@ -52,9 +52,16 @@ export const Preflight: React.FC<{
         {path}
       </p>
       <div className="mt-5">
-        {info.error ? (
+        {info.error && !info.loading ? (
           <Notice tone="caution" icon="error" title={t('mods.sheet.failed')}>
             <p className="select-text">{info.error}</p>
+            <button
+              type="button"
+              className="btn-quiet mt-4 h-10 rounded-full px-5"
+              onClick={info.reload}
+            >
+              {t('mods.sheet.retry')}
+            </button>
           </Notice>
         ) : info.data ? (
           <Facts info={info.data} mode={mode} onMode={setMode} />

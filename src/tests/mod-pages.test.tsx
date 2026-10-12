@@ -215,3 +215,33 @@ describe('installing a mod that is installed already', () => {
     expect(await install(true)).toMatchObject({ replace: false });
   });
 });
+
+describe('looking inside an archive', () => {
+  it('offers to try again when it failed, and asks the engine again', async () => {
+    let looks = 0;
+    engine({
+      modinfo: () => {
+        looks += 1;
+        if (looks === 1) throw new Error('the disk is busy');
+        return create(SourceInfoSchema, { isArchive: false, fits: true });
+      },
+    });
+    render(
+      <EngineProvider>
+        <Preflight
+          path="C:\Downloads\Bus.zip"
+          installed={[]}
+          position={1}
+          total={1}
+          onStarted={() => {}}
+          onDone={() => {}}
+        />
+      </EngineProvider>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: t('mods.sheet.retry') }));
+    const install = await screen.findByRole('button', { name: t('mods.sheet.install') });
+    await waitFor(() => expect((install as HTMLButtonElement).disabled).toBe(false));
+    expect(looks).toBe(2);
+    expect(screen.queryByRole('button', { name: t('mods.sheet.retry') })).toBeNull();
+  });
+});

@@ -21,6 +21,7 @@ const SLOW: Record<string, number> = {
   lines: 60_000,
   minimap: 120_000,
   preflight: 300_000,
+  modinfo: 300_000,
   launch: 60_000,
   stop: 30_000,
   servers: 30_000,

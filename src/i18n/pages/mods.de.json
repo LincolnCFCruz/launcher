@@ -22,6 +22,7 @@
     "of": "{n} von {total}",
     "reading": "Wird angesehen…",
     "failed": "Konnte nicht hineinschauen",
+    "retry": "Nochmal versuchen",
     "archive": "Archiv",
     "unpacked": "Entpackt",
     "files": "Dateien",
