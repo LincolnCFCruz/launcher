@@ -3,9 +3,11 @@ import {
   CancelledSchema,
   ConfigSchema,
   ControllerListSchema,
+  DiagnosticListSchema,
   EmptySchema,
   EngineVersionSchema,
   GameUpdateSchema,
+  InstalledModSchema,
   InstallMode,
   InstallProgressSchema,
   InstallState,
@@ -18,6 +20,8 @@ import {
   LineListSchema,
   LogLinesSchema,
   MapListSchema,
+  ModConflictListSchema,
+  ModsStatusSchema,
   OptionPresetListSchema,
   PaxPackSchema,
   PaxState,
@@ -113,10 +117,10 @@ function seedInstances(): Instance[] {
       pid,
       processStarted: BigInt(now() - 2820),
       slot,
-      log: `C:\\Users\\jakob\\.neoomsi\\game${slot ? `-${slot}` : ''}.log`,
+      log: `C:\\Users\\player\\.neoomsi\\game${slot ? `-${slot}` : ''}.log`,
       started: BigInt(now() - 2820),
-      map: 'Berlin-Spandau 1989',
-      bus: 'Vehicles/MAN/MAN SD200 (SD80).bus',
+      map: 'Westfeld 1989',
+      bus: 'Vehicles/Sample/Double-decker 1979.bus',
       entry: 0,
       line: '92',
       tour: '3',
@@ -128,7 +132,7 @@ function seedInstances(): Instance[] {
   return [
     game(17840, 0, {
       lan: 'host',
-      lastLine: 'Line 92 → Rathaus Spandau, 1 min late, 23 passengers on board',
+      lastLine: 'Line 92 → Rathaus Westfeld, 1 min late, 23 passengers on board',
       lanStatus: {
         role: LanRole.HOST,
         name: CONFIG.profile,
@@ -138,49 +142,49 @@ function seedInstances(): Instance[] {
           {
             id: 1,
             name: CONFIG.profile,
-            bus: 'Vehicles/MAN/MAN SD200 (SD80).bus',
+            bus: 'Vehicles/Sample/Double-decker 1979.bus',
             line: '92',
-            destination: 'Rathaus Spandau',
+            destination: 'Rathaus Westfeld',
             passengers: 23,
             drawn: true,
           },
           {
             id: 2,
-            name: 'Lena K.',
-            bus: 'Vehicles/MAN/MAN SD202 (D92).bus',
+            name: 'Robin',
+            bus: 'Vehicles/Sample/Double-decker 1985.bus',
             line: '137',
-            destination: 'Johannesstift',
+            destination: 'Stift',
             passengers: 11,
             location: '1.2 km ahead',
             drawn: true,
           },
           {
             id: 3,
-            name: 'busfahrer_ole',
-            bus: 'Vehicles/MAN/MAN SL200.bus',
+            name: 'night_driver',
+            bus: 'Vehicles/Sample/Standard bus.bus',
             passengers: 0,
             location: '3.4 km behind',
             drawn: false,
           },
         ],
         chat: [
-          'Lena K.: Bin in 5 Minuten am Rathaus',
-          'busfahrer_ole: kurz Pause, Kaffee',
+          'Robin: Bin in 5 Minuten am Rathaus',
+          'night_driver: kurz Pause, Kaffee',
           `${CONFIG.profile}: Alles klar, ich warte an der Wendeschleife`,
         ],
         warnings: [
-          'busfahrer_ole is missing the map "Berlin-Spandau 1989" v1.3 and sees an older version',
+          'night_driver is missing the map "Westfeld 1989" v1.3 and sees an older version',
         ],
         connected: true,
         hostName: CONFIG.profile,
-        map: 'maps/Berlin-Spandau/global.cfg',
+        map: 'maps/Westfeld/global.cfg',
       },
     }),
     game(17112, 1, {
       started: BigInt(now() - 5400),
       processStarted: BigInt(now() - 5400),
       map: 'Grundorf',
-      bus: 'Vehicles/MAN/MAN NL202.bus',
+      bus: 'Vehicles/Sample/Low-floor bus.bus',
       line: '24',
       tour: '2',
       running: false,
@@ -192,7 +196,7 @@ function seedInstances(): Instance[] {
       started: BigInt(now() - 7800),
       processStarted: BigInt(now() - 7800),
       map: 'Neuhausen',
-      bus: 'Vehicles/O530/O530.bus',
+      bus: 'Vehicles/CityBus2000/CityBus2000.bus',
       line: undefined,
       tour: undefined,
       running: false,
@@ -217,7 +221,7 @@ export class MockLauncher {
   private servers: ServerInfo[] = [...SERVERS];
   private instances: Instance[] = seedInstances();
   private jobs: InstallProgress[] = structuredClone(MODS.jobs);
-  private installedMods: InstalledMod[] = structuredClone(MODS.installed ?? []);
+  private installedMods: InstalledMod[] = structuredClone(MODS.installed);
   private jobTicks = new Map<bigint, number>(
     MODS.jobs.filter((j) => j.finished === undefined).map((j) => [j.id, 4]),
   );
@@ -267,9 +271,46 @@ export class MockLauncher {
       }
       return create(EmptySchema);
     },
-    mods: () => ({ ...MODS, jobs: this.jobs, installed: this.installedMods }),
+    mods: () => this.modsStatus(),
+    saveModOrder: ({ order, revision, newMods }) => {
+      this.checkRevision(revision);
+      const listed = (order ?? []).flatMap(
+        (n) => this.installedMods.find((m) => m.name === n) ?? [],
+      );
+      this.installedMods = [...listed, ...this.installedMods.filter((m) => !listed.includes(m))];
+      this.newMods = newMods === 'bottom' ? 'bottom' : 'top';
+      this.orderRevision += 1n;
+      return this.modsStatus();
+    },
+    resetModOrder: ({ revision }) => {
+      this.checkRevision(revision);
+      this.installedMods = this.installedMods
+        .filter((m) => m.available)
+        .sort((a, b) => a.name.localeCompare(b.name));
+      this.orderRevision += 1n;
+      return this.modsStatus();
+    },
+    forgetMod: ({ name }) => {
+      this.installedMods = this.installedMods.filter((m) => m.name !== name);
+      this.orderRevision += 1n;
+      return this.modsStatus();
+    },
+    modConflicts: () =>
+      create(ModConflictListSchema, {
+        mods: this.installedMods
+          .filter((m) => m.available)
+          .map((m, i) => ({
+            name: m.name,
+            files: 120,
+            overrides: i === 0 ? 14 : 0,
+            overridden: i === 1 ? 14 : 0,
+            hiddenBy: i === 1 ? [this.installedMods[0].name] : [],
+            overridesMods: i === 0 && this.installedMods[1] ? [this.installedMods[1].name] : [],
+          })),
+      }),
     modinfo: ({ path }) => modInfo(path ?? ''),
-    startInstall: ({ path, mode }) => this.install(path ?? '', mode ?? InstallMode.AUTO),
+    startInstall: ({ path, mode, replace }) =>
+      this.install(path ?? '', mode ?? InstallMode.AUTO, replace ?? false),
     cancelInstall: ({ id }) => {
       const job = this.jobs.find((j) => j.id === id);
       if (!job || job.finished !== undefined) return create(CancelledSchema);
@@ -283,10 +324,17 @@ export class MockLauncher {
       return create(EmptySchema);
     },
     uninstallMod: ({ name }) => {
+      if (!this.installedMods.some((m) => m.name === name)) {
+        throw new Error(`'${name}' is not an installed mod`);
+      }
+      this.installedMods = this.installedMods.filter((m) => m.name !== name);
+      return create(EmptySchema);
+    },
+    allowModPlugins: ({ name, allowed }) => {
       const mod = this.installedMods.find((m) => m.name === name);
-      if (!mod) throw new Error(`${name} is not installed`);
-      this.installedMods = this.installedMods.filter((m) => m !== mod);
-      return { uninstalled: mod.folders };
+      if (!mod) throw new Error(`'${name}' is not an installed mod`);
+      mod.pluginsAllowed = mod.hasPlugins && (allowed ?? false);
+      return create(EmptySchema);
     },
     instances: () => create(InstanceListSchema, { instances: this.instances }),
     launch: (duty) => this.launch(duty),
@@ -335,10 +383,20 @@ export class MockLauncher {
       return create(ControllerListSchema, { controllers: this.controllers });
     },
     preview: ({ paint }) => mockBusModel(paint ?? ''),
+    mapPicture: () => new Uint8Array(),
+    preflight: ({ map }) =>
+      create(DiagnosticListSchema, {
+        findings: map === 'maps/Westfeld/global.cfg' ? this.findings() : [],
+      }),
+    dismissDiagnostic: ({ key }) => {
+      this.dismissed.add(key ?? '');
+      return create(EmptySchema);
+    },
+    diagnostics: () => create(DiagnosticListSchema, { findings: this.findings() }),
     situations: ({ map }) =>
       create(SituationListSchema, {
         situations:
-          map === 'maps/Berlin-Spandau/global.cfg'
+          map === 'maps/Westfeld/global.cfg'
             ? [{ name: 'Line 92, tour 2', file: 'laststn.osn', time: BigInt(now() - 7200) }]
             : [],
       }),
@@ -375,7 +433,7 @@ export class MockLauncher {
       pid,
       processStarted: secs(),
       slot: this.instances.length,
-      log: `C:\\Users\\jakob\\.neoomsi\\game${this.instances.length ? `-${this.instances.length}` : ''}.log`,
+      log: `C:\\Users\\player\\.neoomsi\\game${this.instances.length ? `-${this.instances.length}` : ''}.log`,
       started: secs(),
       map: MAPS.find((m) => m.file === map)?.friendly ?? map,
       bus: VEHICLES.find((v) => v.file === bus)?.name ?? bus,
@@ -436,9 +494,9 @@ export class MockLauncher {
     const until = Number(instance.ended ?? secs());
     const ticks = Math.min(400, Math.floor((until - started) / 3));
     const events = [
-      'INFO  stop "Rathaus Spandau": 14 in, 9 out',
+      'INFO  stop "Rathaus Westfeld": 14 in, 9 out',
       'INFO  ticket sold: single fare 2.70',
-      'INFO  timetable: 1 min 20 s late at "Altstädter Ring"',
+      'INFO  timetable: 1 min 20 s late at "Altstadtring"',
       'WARN  spline 1184 has no neighbour at its end, AI traffic turns back',
       'INFO  autosave written',
       'INFO  passenger complaint: harsh braking',
@@ -447,7 +505,7 @@ export class MockLauncher {
       `INFO  neoOMSI 0.2.0 starting, process ${pid}`,
       `INFO  map ${instance.map}`,
       `INFO  bus ${instance.bus}`,
-      'INFO  graphics: Vulkan, NVIDIA GeForce RTX 3070',
+      'INFO  graphics: Vulkan, discrete GPU',
       'WARN  texture "Sceneryobjects/Bushaltestelle/hst.dds" missing, using a placeholder',
       'INFO  timetable: 3 lines, 9 tours',
       ...Array.from({ length: ticks }, (_, k) => {
@@ -465,8 +523,8 @@ export class MockLauncher {
     const value = text.trim();
     if (/^OMSI(-[A-Z0-9]{4}){2,}$/.test(value.toUpperCase())) {
       return {
-        ...create(JoinCheckSchema, { ok: true, text: 'The host drives on Berlin-Spandau 1989' }),
-        map: 'maps/Berlin-Spandau/global.cfg',
+        ...create(JoinCheckSchema, { ok: true, text: 'The host drives on Westfeld 1989' }),
+        map: 'maps/Westfeld/global.cfg',
       };
     }
     const address = value.match(
@@ -484,7 +542,43 @@ export class MockLauncher {
     });
   }
 
-  private install(path: string, mode: InstallMode): InstallProgress {
+  private replacing = new Set<bigint>();
+  private orderRevision = 0n;
+  private dismissed = new Set<string>();
+  private newMods = 'top';
+
+  private findings() {
+    return [
+      {
+        class: 'missing_dependency',
+        requester: 'Westfeld_1989',
+        pack: 'Sceneryobjects/Westfeld_Haltestellen',
+        severity: 'required',
+        count: 12,
+        samples: ['Sceneryobjects/Westfeld_Haltestellen/hst.sco'],
+        key: 'westfeld-hst',
+      },
+    ].filter((f) => !this.dismissed.has(f.key));
+  }
+
+  private modsStatus() {
+    return create(ModsStatusSchema, {
+      ...MODS,
+      jobs: this.jobs,
+      installed: this.installedMods,
+      inboxItems: this.installedMods.filter((m) => m.available).map((m) => m.name),
+      orderRevision: this.orderRevision,
+      newMods: this.newMods,
+    });
+  }
+
+  private checkRevision(revision: bigint | undefined) {
+    if ((revision ?? 0n) !== this.orderRevision) {
+      throw new Error('the load order was changed elsewhere - it was read again');
+    }
+  }
+
+  private install(path: string, mode: InstallMode, replace: boolean): InstallProgress {
     const job = create(InstallProgressSchema, {
       id: this.jobs.reduce((max, j) => (j.id > max ? j.id : max), 0n) + 1n,
       source: path,
@@ -497,6 +591,7 @@ export class MockLauncher {
     });
     this.jobs.unshift(job);
     this.jobTicks.set(job.id, 0);
+    if (replace) this.replacing.add(job.id);
     return job;
   }
 
@@ -526,49 +621,51 @@ export class MockLauncher {
   }
 
   private stepJob(job: InstallProgress, tick: number) {
-    const unpackSteps = 6;
+    const copySteps = 6;
     const bytes = Number(job.bytesTotal) || mockSize(job.name);
     const files = Number(job.filesTotal) || Math.max(12, Math.round(bytes / 2_600_000));
     const inPlace = job.mode === InstallMode.IN_PLACE;
-    const archive = /\.(zip|7z|rar)$/i.test(job.source);
-    const dest = inPlace ? `Archives/${job.source.split(/[\\/]/).pop()}` : mockDest(job.name);
-    if (tick === 1) {
-      job.state = InstallState.PLANNING;
-      job.message = archive ? "reading the archive's table of contents" : 'listing the folder';
-      job.report = [`${job.name} -> ${dest}/ (${files} files, ${mockGb(bytes)})`];
-    } else if (tick === 2) {
-      job.state = InstallState.CHECKING;
-      job.message = 'checking the free disk space';
-      job.filesTotal = BigInt(files);
-      job.bytesTotal = BigInt(bytes);
-      job.neededBytes = BigInt(bytes + 512 * 1024 * 1024);
-    } else if (tick < 3 + unpackSteps) {
-      const done = (tick - 2) / unpackSteps;
-      job.state = archive && !inPlace ? InstallState.UNPACKING : InstallState.COPYING;
-      job.message = inPlace
-        ? `copying the archive (${mockGb(bytes)})`
-        : `${files} files, ${mockGb(bytes)}`;
+    const entry = inPlace ? `${job.name}.zip` : job.name;
+    const stem = (n: string) => n.replace(/\.zip$/i, '').toLowerCase();
+    const existing = this.installedMods.filter((m) => stem(m.name) === job.name.toLowerCase());
+    if (tick === 1 && existing.length > 0 && !this.replacing.has(job.id)) {
+      job.state = InstallState.FAILED;
+      job.message = `mod '${job.name}' is already installed - install it with Replace to update it`;
+      job.report = [`failed: ${job.message}`];
+      job.finished = secs();
+    } else if (tick < 1 + copySteps) {
+      const done = tick / copySteps;
+      job.state = InstallState.COPYING;
+      job.message = `installing ${job.name} into the mods folder`;
       job.filesTotal = BigInt(files);
       job.bytesTotal = BigInt(bytes);
       job.filesDone = BigInt(Math.round(files * done));
       job.bytesDone = BigInt(Math.round(bytes * done));
-    } else if (tick === 3 + unpackSteps) {
+    } else if (tick === 1 + copySteps) {
       job.state = InstallState.MOVING;
-      job.message = inPlace
-        ? 'putting the archive into place'
-        : 'moving the files into the content folder';
+      job.message = 'moving it into place';
       job.filesDone = BigInt(files);
       job.bytesDone = BigInt(bytes);
     } else {
       job.state = InstallState.DONE;
-      job.message = `installed ${dest} - it is in the lists now`;
-      job.report = [...job.report, job.message];
-      job.installed = [dest];
+      job.message = `installed as mods/${entry}`;
+      job.report = [job.message];
+      job.installed = [`mods/${entry}`];
       job.finished = secs();
-      this.installedMods = [
-        { name: job.name, installed: now(), folders: [dest], size: bytes },
-        ...this.installedMods.filter((m) => m.name !== job.name),
-      ];
+      const installed = create(InstalledModSchema, {
+        name: entry,
+        available: true,
+        installed: BigInt(now()),
+        size: inPlace ? BigInt(bytes) : 0n,
+        inPlace,
+      });
+      // an update keeps its place; a new mod goes where the player wants new mods
+      const slot = this.installedMods.findIndex((m) => existing.includes(m));
+      const rest = this.installedMods.filter((m) => !existing.includes(m));
+      if (slot >= 0) rest.splice(slot, 0, installed);
+      else if (this.newMods === 'bottom') rest.push(installed);
+      else rest.unshift(installed);
+      this.installedMods = rest;
     }
   }
 }
@@ -577,15 +674,6 @@ function mockSize(name: string) {
   let hash = 0;
   for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
   return 60_000_000 + (hash % 2_100) * 1_000_000;
-}
-
-const mockGb = (n: number) =>
-  n >= 1e9 ? `${(n / 1e9).toFixed(1)} GB` : `${Math.round(n / 1e6)} MB`;
-
-function mockDest(name: string) {
-  if (/map|spandau|grundorf|ruhr|neuhausen|stadt/i.test(name)) return `maps/${name}`;
-  if (/haltestell|scenery|objekt|schild/i.test(name)) return `Sceneryobjects/${name}`;
-  return `Vehicles/${name}`;
 }
 
 function modInfo(path: string): SourceInfo {

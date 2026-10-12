@@ -23,6 +23,7 @@ import { PassengerPromo } from './Promo';
 import { RoadbookStep } from './RoadbookStep';
 import { RouteStep } from './RouteStep';
 import { TimeStep, weatherIcon, weatherLabel } from './TimeStep';
+import { MissingContent } from '../sessions/MissingContent';
 
 const STEPS = ['route', 'bus', 'time', 'roadbook'] as const;
 type Step = (typeof STEPS)[number];
@@ -263,6 +264,9 @@ function Home({
   const side = useRef<HTMLDivElement>(null);
   const plan = useRef<HTMLDivElement>(null);
   const p = picked(data, choice);
+  const missing = useCommand('preflight', choice.map ? { map: choice.map } : null).data?.findings;
+  const [missingOpen, setMissingOpen] = useState(false);
+  const missingPacks = [...new Set((missing ?? []).map((f) => f.pack).filter(Boolean))];
   const rows: [Step, string, string][] = [
     ['route', p.map?.friendly ?? '–', dutyLabel(choice, data, p)],
     ['bus', p.bus?.name ?? t('drive.summary.noBus'), choice.paint || p.bus?.defaultPaint || ''],
@@ -296,6 +300,36 @@ function Home({
               <span className="text-muted"> · {p.bus.missingPacks.join(', ')}</span>
             </span>
           </p>
+        )}
+        {missing && missing.length > 0 && (
+          <div className="mb-3">
+            <p className="flex items-center gap-2.5 text-[15px]">
+              <Icon
+                name="warning"
+                size={20}
+                style={{ color: 'var(--color-warn)', flexShrink: 0 }}
+              />
+              <span className="min-w-0 truncate">
+                <span className="font-semibold text-heading">{t('drive.map.contentMissing')}</span>
+                {missingPacks.length > 0 && (
+                  <span className="text-muted"> · {missingPacks.join(', ')}</span>
+                )}
+              </span>
+              <button
+                type="button"
+                className="code-action shrink-0"
+                aria-expanded={missingOpen}
+                onClick={() => setMissingOpen((v) => !v)}
+              >
+                {t('drive.map.details')}
+              </button>
+            </p>
+            {missingOpen && (
+              <div className="mt-2">
+                <MissingContent findings={missing} />
+              </div>
+            )}
+          </div>
         )}
         {server && (
           <p className="mb-3 flex items-center gap-2.5 text-[15px]">

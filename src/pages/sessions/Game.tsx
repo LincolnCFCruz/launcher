@@ -4,13 +4,14 @@ import { Icon } from '../../components/Icon';
 import { LineBadge } from '../../components/LineBadge';
 import { Badge } from '../../components/ui';
 import { t } from '../../i18n';
-import { call, errorText, useEngine } from '../../lib/engine';
+import { call, errorText, useCommand, useEngine } from '../../lib/engine';
 import { ago, duration, lineLabel } from '../../lib/format';
 import { useToast } from '../../lib/nav';
 import { GameLinkState, LanRole, type Instance } from '../../types/launcher';
 import { useNames } from '../profile/names';
 import { clock, exitCodeText, exitState } from './clock';
 import { LogView } from './LogView';
+import { MissingContent } from './MissingContent';
 
 export function duty(line: string | null | undefined, tour: string | null | undefined) {
   if (!line) return t('sessions.freeDrive');
@@ -33,6 +34,8 @@ export function Mark({ line, muted }: { line?: string | null; muted?: boolean })
 
 export const Game: React.FC<{ instance: Instance; now: number }> = ({ instance: i, now }) => {
   const [log, setLog] = useState(false);
+  const [missing, setMissing] = useState(false);
+  const findings = useCommand('diagnostics', { instance: i.id }).data?.findings ?? [];
   const [confirm, setConfirm] = useState(false);
   const [stopping, setStopping] = useState(false);
   const { refreshInstances } = useEngine();
@@ -119,6 +122,19 @@ export const Game: React.FC<{ instance: Instance; now: number }> = ({ instance: 
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          {findings.length > 0 && (
+            <button
+              type="button"
+              className={`theme-toggle flex w-auto items-center gap-1 rounded-full px-2.5 text-warn ${missing ? 'bg-sunken' : ''}`}
+              aria-label={t('sessions.missing.show')}
+              title={t('sessions.missing.show')}
+              aria-expanded={missing}
+              onClick={() => setMissing((v) => !v)}
+            >
+              <Icon name="warning" size={18} />
+              <span className="text-[14px] tabular-nums">{findings.length}</span>
+            </button>
+          )}
           <button
             type="button"
             className={`theme-toggle rounded-full ${log ? 'bg-sunken text-ink' : ''}`}
@@ -150,6 +166,11 @@ export const Game: React.FC<{ instance: Instance; now: number }> = ({ instance: 
           )}
         </div>
       </div>
+      {missing && findings.length > 0 && (
+        <div className="px-5 pb-5">
+          <MissingContent findings={findings} />
+        </div>
+      )}
       {log && (
         <div className="px-5 pb-5">
           <LogView instance={i} onClose={() => setLog(false)} />

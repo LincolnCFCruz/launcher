@@ -62,5 +62,16 @@
   "views": {
     "running": "Laufend",
     "history": "Verlauf"
+  },
+  "missing": {
+    "title": "Fehlende Inhalte",
+    "show": "Fehlende Inhalte zeigen",
+    "hint": "Installiere oder aktiviere, was genannt ist, oder prüfe die Ladereihenfolge. Fehlen Dateien in einem Mod, hilft meist eine neue Kopie des Mods.",
+    "missing_dependency": "{requester} braucht {pack}, das nicht installiert ist ({count} Dateien)",
+    "inactive_dependency": "{requester} braucht {pack}: Es liegt in {provider}, das deinstalliert ist ({count} Dateien)",
+    "incomplete_pack": "{requester} braucht Dateien, die {provider} in {pack} nicht hat - vielleicht eine andere Version ({count} Dateien)",
+    "incomplete_mod": "{requester} fehlen eigene Dateien in {pack} ({count} Dateien)",
+    "missing_file": "{requester}: {count} Dateien nicht gefunden",
+    "dismiss": "Nicht mehr anzeigen"
   }
 }

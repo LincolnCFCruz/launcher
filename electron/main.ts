@@ -9,7 +9,7 @@ import {
 } from 'electron';
 import { existsSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
+import { dirname, extname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { EngineClient } from './client';
 import { MockEngineClient } from './mock-client';
@@ -19,11 +19,9 @@ import type { EngineStatus } from '../src/types/scaffold';
 import type { LauncherPrefs, PickKind } from '../src/types/neoomsi';
 import {
   COMMANDS,
-  type Config,
   type EngineEvent,
   type Instance,
   type Launched,
-  type MapList,
   UpdateState,
 } from '../src/types/launcher';
 import packageJson from '../package.json' with { type: 'json' };
@@ -268,23 +266,10 @@ registerIpcHandler('engine:preview-model', async (_, bus: string, paint: string)
   return new Uint8Array(await readFile(path));
 });
 
+// The engine reads it from whichever content root has the map (a mod's folder or archive too).
 registerIpcHandler('engine:map-picture', async (_, mapFile: string) => {
-  const client = requireEngine();
-  const [config, maps] = await Promise.all([
-    client.sendRequest<Config>('config', {}),
-    client.sendRequest<MapList>('maps', {}),
-  ]);
-  const map = maps.maps.find((m) => m.file === mapFile);
-  if (!map || !config.root) return null;
-  const root = resolve(config.root);
-  const picture = resolve(root, dirname(map.file), 'picture.jpg');
-  const rel = relative(root, picture);
-  if (rel.startsWith('..') || isAbsolute(rel)) return null;
-  try {
-    return new Uint8Array(await readFile(picture));
-  } catch {
-    return null;
-  }
+  const picture = await requireEngine().sendRequest<Uint8Array>('mapPicture', { map: mapFile });
+  return picture.length > 0 ? picture : null;
 });
 
 registerIpcHandler('window:minimize', () => mainWindow?.minimize());

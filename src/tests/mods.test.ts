@@ -4,21 +4,22 @@ import { MockLauncher } from '../../electron/mock/launcher';
 import {
   canInstall,
   enqueue,
-  filterInstalled,
+  installedAs,
   isRunning,
   jobProgress,
-  readMods,
+  mergeDraft,
+  move,
+  removable,
+  renamedAs,
   splitJobs,
   stateTone,
-  usedInPlace,
 } from '../pages/mods/logic';
 import {
   InstallMode,
+  InstalledModSchema,
   InstallProgressSchema,
   InstallState,
-  ModsStatusSchema,
   SourceInfoSchema,
-  type InstalledMod,
 } from '../types/launcher';
 
 const job = (patch: MessageInitShape<typeof InstallProgressSchema>) =>
@@ -86,20 +87,42 @@ describe('mods logic', () => {
     expect(canInstall(info({ inPlaceOk: false }), InstallMode.IN_PLACE)).toBe(false);
   });
 
-  it('searches installed mods by name and folder, newest first', () => {
-    const mods: InstalledMod[] = [
-      { name: 'MAN_NL202', installed: 1, folders: ['Vehicles/MAN_NL202'], size: 1 },
-      { name: 'Spandau', installed: 3, folders: ['maps/Berlin-Spandau'], size: 1 },
-      { name: 'Neuhausen', installed: 2, folders: ['Archives/Neuhausen.zip'], size: 1 },
-    ];
-    expect(filterInstalled(mods, '').map((m) => m.name)).toEqual([
-      'Spandau',
-      'Neuhausen',
-      'MAN_NL202',
-    ]);
-    expect(filterInstalled(mods, 'berlin').map((m) => m.name)).toEqual(['Spandau']);
-    expect(usedInPlace(mods[2])).toBe(true);
-    expect(usedInPlace(mods[0])).toBe(false);
+  const mods = [
+    create(InstalledModSchema, { name: 'MAN_NL202', installed: 1n }),
+    create(InstalledModSchema, { name: 'Spandau', installed: 3n }),
+    create(InstalledModSchema, { name: 'Neuhausen.zip', installed: 2n, inPlace: true }),
+  ];
+
+  it('moves an entry of the load order to any place', () => {
+    expect(move(['a', 'b', 'c', 'd'], 3, 0)).toEqual(['d', 'a', 'b', 'c']);
+    expect(move(['a', 'b', 'c', 'd'], 0, 2)).toEqual(['b', 'c', 'a', 'd']);
+    expect(move(['a', 'b', 'c'], 1, 9)).toEqual(['a', 'c', 'b']);
+  });
+
+  it('keeps an unsaved order in step with what the engine lists', () => {
+    // the player moved c to the top; meanwhile b was uninstalled and n installed (at the top)
+    expect(mergeDraft(['c', 'a', 'b'], ['n', 'a', 'c'])).toEqual(['n', 'c', 'a']);
+  });
+
+  it('recognises a renamed mod only when one entry looks like it', () => {
+    const here = ['BVG_Signs_2023.zip', 'Other_Bus'];
+    expect(renamedAs('BVG_Signs_2015', here)).toBe('BVG_Signs_2023.zip');
+    expect(renamedAs('Unrelated', here)).toBeUndefined();
+    expect(renamedAs('Bus_1', ['Bus_2', 'bus-3'])).toBeUndefined();
+  });
+
+  it('offers Uninstall only for mods of the mods folder', () => {
+    const entry = (name: string, available = true) =>
+      create(InstalledModSchema, { name, available });
+    expect(removable(entry('Bus.zip'))).toBe(true);
+    expect(removable(entry('Archives/Old.zip'))).toBe(false);
+    expect(removable(entry('Gone', false))).toBe(false);
+  });
+
+  it('finds the installed mod a source would replace, folder or archive', () => {
+    expect(installedAs(mods, 'C:\\Downloads\\neuhausen.7z')?.name).toBe('Neuhausen.zip');
+    expect(installedAs(mods, '/home/me/MAN_NL202.zip')?.name).toBe('MAN_NL202');
+    expect(installedAs(mods, '/home/me/Other.zip')).toBeUndefined();
   });
 
   it('queues each dropped path once', () => {
@@ -108,10 +131,6 @@ describe('mods logic', () => {
 });
 
 describe('reading what the engine sends', () => {
-  it('lists no installed mods while the engine does not send them', () => {
-    expect(readMods(create(ModsStatusSchema, { contentDir: 'C:/content' })).installed).toEqual([]);
-  });
-
   it('does not treat an ended job without an end time as running', () => {
     expect(isRunning(job({ state: InstallState.FAILED }))).toBe(false);
     expect(isRunning(job({}))).toBe(true);
@@ -133,21 +152,40 @@ describe('mock mods engine', () => {
       seen.add(j.state);
     }
     expect([...seen]).toEqual(
-      expect.arrayContaining([
-        InstallState.PLANNING,
-        InstallState.CHECKING,
-        InstallState.UNPACKING,
-        InstallState.MOVING,
-        InstallState.DONE,
-      ]),
+      expect.arrayContaining([InstallState.COPYING, InstallState.MOVING, InstallState.DONE]),
     );
     const mods = await engine.handle('mods', {});
-    expect(mods.installed?.[0].name).toBe('Citaro_K');
+    expect(mods.installed[0].name).toBe('Citaro_K');
 
-    const { uninstalled } = await engine.handle('uninstallMod', { name: 'Citaro_K' });
-    expect(uninstalled).toEqual(['Vehicles/Citaro_K']);
-    expect(
-      ((await engine.handle('mods', {})).installed ?? []).some((m) => m.name === 'Citaro_K'),
-    ).toBe(false);
+    const again = await engine.handle('startInstall', { path: 'C:\\Citaro_K.zip' });
+    engine.advanceJobs();
+    const failed = (await engine.handle('mods', {})).jobs.find((x) => x.id === again.id)!;
+    expect(failed.state).toBe(InstallState.FAILED);
+
+    await engine.handle('uninstallMod', { name: 'Citaro_K' });
+    expect((await engine.handle('mods', {})).installed.some((m) => m.name === 'Citaro_K')).toBe(
+      false,
+    );
+  });
+
+  it('keeps the player order and places new mods where the player wants them', async () => {
+    const engine = new MockLauncher();
+    const before = await engine.handle('mods', {});
+    const order = before.installed.map((m) => m.name).reverse();
+    expect(() =>
+      engine.handle('saveModOrder', { order, revision: before.orderRevision + 1n, newMods: 'top' }),
+    ).toThrow('changed elsewhere');
+    const saved = await engine.handle('saveModOrder', {
+      order,
+      revision: before.orderRevision,
+      newMods: 'bottom',
+    });
+    expect(saved.installed.map((m) => m.name)).toEqual(order);
+    await engine.handle('startInstall', { path: 'C:\\New_Bus.zip', mode: InstallMode.EXTRACT });
+    for (let i = 0; i < 12; i++) engine.advanceJobs();
+    const after = (await engine.handle('mods', {})).installed.map((m) => m.name);
+    // (the install that was already running finishes too: also at the bottom)
+    expect(after.slice(0, order.length)).toEqual(order);
+    expect(after.at(-1)).toBe('New_Bus');
   });
 });

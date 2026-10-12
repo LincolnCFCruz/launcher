@@ -9,14 +9,12 @@
   "reading": "Reading the content folder…",
   "loadFailed": "Could not read the content folder",
   "cleaned": "Tidied up after an interrupted install",
-  "search": "Search mods",
   "none": "No mods installed yet",
   "noneHint": "Install one with the button on the left, or drop an archive here.",
-  "noMatch": "No mod matches “{query}”",
   "inPlace": "in place",
   "archives": "Archives used in place",
   "sections": {
-    "installed": "Installed",
+    "installed": "Load order",
     "installing": "Installing",
     "folders": "Content folders"
   },
@@ -34,7 +32,9 @@
     "mode": "Install as",
     "install": "Install",
     "skip": "Skip",
-    "started": "Installing {name}…"
+    "started": "Installing {name}…",
+    "replace": "Replace the installed {name}",
+    "replaceHint": "The installed version moves to mods/uninstalled."
   },
   "mode": {
     "auto": "Auto",
@@ -74,16 +74,14 @@
     "clear": "Clear finished",
     "files": "{done} / {total} files",
     "preparing": "Preparing…",
-    "fromInbox": "from the inbox",
-    "installed": "Installed {folder}",
-    "keptAside": "{name} kept aside until its bus is installed"
+    "installed": "Installed {folder}"
   },
   "uninstall": {
     "label": "Uninstall {name}",
     "title": "Uninstall {name}?",
-    "body": "Nothing is deleted: its folders move to {folder}.",
+    "body": "Nothing is deleted: the mod moves to {folder}. Running games keep using it until they are restarted.",
     "confirm": "Uninstall",
-    "done": "{name} uninstalled. Its folders are in Mods/uninstalled."
+    "done": "{name} uninstalled. It is in mods/uninstalled."
   },
   "content": {
     "title": "Content folder",
@@ -96,8 +94,40 @@
     "folder": "Mods folder",
     "active": "Available to neoOMSI"
   },
-  "waiting": {
-    "title": "Waiting for their bus",
-    "hint": "Paints for a bus you don't have yet. They install once it's there."
+  "plugins": {
+    "label": "Plugins",
+    "allow": "Allow the plugins of {name}",
+    "hint": "Plugins are program code that runs inside the game. Allow them only for mods you trust. Takes effect at the next game start."
+  },
+  "unreadable": "The game cannot read it: {error}",
+  "order": {
+    "title": "Priority",
+    "hint": "Higher in the list wins: when two entries have the same file, the game uses the one higher up. Drag an entry or use the arrows, then apply.",
+    "running": "Running games keep the order they started with.",
+    "unreadable": "The saved load order could not be read; the default order is in effect",
+    "undo": "Undo",
+    "apply": "Apply",
+    "toTop": "Move {name} to the top",
+    "up": "Move {name} up",
+    "down": "Move {name} down",
+    "toBottom": "Move {name} to the bottom",
+    "forget": "Forget",
+    "forgetHint": "Remove it from the load order. If it comes back, it is placed like a new mod.",
+    "unavailable": "Not in the content folder. It keeps its place in case it comes back.",
+    "newMods": "Newly installed mods",
+    "newModsHint": "Where a new mod goes in the list. Mods already in the list never move by themselves.",
+    "top": "At the top",
+    "bottom": "At the bottom",
+    "reset": "Reset the load order",
+    "resetHint": "Back to the default order: alphabetical, as before there was a load order.",
+    "resetAction": "Reset",
+    "resetBody": "Your order is replaced by the default order. Entries that are not installed are dropped.",
+    "hidden": "Fully hidden by {mods}: none of its files are used",
+    "overridden": "{n} files hidden by {mods}",
+    "overrides": "Replaces {n} files of {mods}",
+    "replaces": "Replaces {n} original OMSI 2 files",
+    "clash": "Another bus uses the same folder: {clash}",
+    "renamed": "Renamed to {name}?",
+    "takePlace": "Give it this place"
   }
 }

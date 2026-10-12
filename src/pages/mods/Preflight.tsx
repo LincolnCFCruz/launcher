@@ -1,33 +1,40 @@
 import React, { useState } from 'react';
 import { Modal } from '../../components/Dialog';
 import { Icon } from '../../components/Icon';
-import { Notice, Segmented, Spinner } from '../../components/ui';
+import { Notice, Segmented, Spinner, Switch } from '../../components/ui';
 import { t } from '../../i18n';
 import { call, errorText, useCommand } from '../../lib/engine';
 import { bytes, number } from '../../lib/format';
 import { useToast } from '../../lib/nav';
-import { InstallMode, type SourceInfo } from '../../types/launcher';
-import { autoTakes, canInstall, fileName, modeKey } from './logic';
+import { InstallMode, type InstalledMod, type SourceInfo } from '../../types/launcher';
+import { autoTakes, canInstall, fileName, installedAs, modeKey } from './logic';
 
 const MODES = [InstallMode.AUTO, InstallMode.EXTRACT, InstallMode.IN_PLACE];
 
 export const Preflight: React.FC<{
   path: string;
+  installed: InstalledMod[];
   position: number;
   total: number;
   onStarted: () => void;
   onDone: () => void;
-}> = ({ path, position, total, onStarted, onDone }) => {
+}> = ({ path, installed, position, total, onStarted, onDone }) => {
   const info = useCommand('modinfo', { path });
   const toast = useToast();
   const [mode, setMode] = useState(InstallMode.AUTO);
   const [busy, setBusy] = useState(false);
+  const [replace, setReplace] = useState(true);
   const name = fileName(path);
+  const existing = installedAs(installed, path);
 
   const install = async () => {
     setBusy(true);
     try {
-      await call('startInstall', { path, mode: info.data?.isArchive ? mode : InstallMode.AUTO });
+      await call('startInstall', {
+        path,
+        mode: info.data?.isArchive ? mode : InstallMode.AUTO,
+        replace: !!existing && replace,
+      });
       toast(t('mods.sheet.started', { name }), 'tip');
       onStarted();
       onDone();
@@ -39,7 +46,7 @@ export const Preflight: React.FC<{
   };
 
   return (
-    <Modal title={name.replace(/([_.-])/g, '$1​')} onClose={onDone}>
+    <Modal title={name.replace(/([_.-])/g, '$1\u200B')} onClose={onDone}>
       <p className="mt-1 truncate text-[14px] text-muted select-text" title={path}>
         {total > 1 && `${t('mods.sheet.of', { n: position, total })} · `}
         {path}
@@ -55,6 +62,19 @@ export const Preflight: React.FC<{
           <Spinner label={t('mods.sheet.reading')} />
         )}
       </div>
+      {existing && (
+        <label className="mt-6 flex items-center justify-between gap-4 text-[15px]">
+          <span>
+            {t('mods.sheet.replace', { name: existing.name })}
+            <span className="block text-[14px] text-muted">{t('mods.sheet.replaceHint')}</span>
+          </span>
+          <Switch
+            checked={replace}
+            onChange={setReplace}
+            label={t('mods.sheet.replace', { name: existing.name })}
+          />
+        </label>
+      )}
       <div className="mt-7 flex justify-end gap-2">
         <button type="button" className="btn-quiet h-11 rounded-full px-5" onClick={onDone}>
           {total > 1 ? t('mods.sheet.skip') : t('common.cancel')}

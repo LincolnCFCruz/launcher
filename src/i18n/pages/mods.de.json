@@ -9,14 +9,12 @@
   "reading": "Inhaltsordner wird gelesen…",
   "loadFailed": "Der Inhaltsordner konnte nicht gelesen werden",
   "cleaned": "Reste einer abgebrochenen Installation entfernt",
-  "search": "Mods durchsuchen",
   "none": "Noch keine Mods installiert",
   "noneHint": "Installier eine mit dem Knopf links oder zieh ein Archiv hierher.",
-  "noMatch": "Keine Mod passt zu „{query}“",
   "inPlace": "direkt genutzt",
   "archives": "Direkt genutzte Archive",
   "sections": {
-    "installed": "Installiert",
+    "installed": "Ladereihenfolge",
     "installing": "Wird installiert",
     "folders": "Inhaltsordner"
   },
@@ -34,7 +32,9 @@
     "mode": "Installieren als",
     "install": "Installieren",
     "skip": "Überspringen",
-    "started": "{name} wird installiert…"
+    "started": "{name} wird installiert…",
+    "replace": "Installierte Version von {name} ersetzen",
+    "replaceHint": "Die installierte Version wird nach mods/uninstalled verschoben."
   },
   "mode": {
     "auto": "Automatisch",
@@ -74,16 +74,14 @@
     "clear": "Fertige entfernen",
     "files": "{done} / {total} Dateien",
     "preparing": "Wird vorbereitet…",
-    "fromInbox": "aus dem Eingang",
-    "installed": "{folder} installiert",
-    "keptAside": "{name} zurückgelegt, bis der Bus installiert ist"
+    "installed": "{folder} installiert"
   },
   "uninstall": {
     "label": "{name} deinstallieren",
     "title": "{name} deinstallieren?",
-    "body": "Gelöscht wird nichts: Die Ordner werden nach {folder} verschoben.",
+    "body": "Gelöscht wird nichts: Der Mod wird nach {folder} verschoben. Laufende Spiele nutzen ihn bis zum Neustart weiter.",
     "confirm": "Deinstallieren",
-    "done": "{name} deinstalliert. Die Ordner liegen in Mods/uninstalled."
+    "done": "{name} deinstalliert. Der Mod liegt in mods/uninstalled."
   },
   "content": {
     "title": "Inhaltsordner",
@@ -96,8 +94,40 @@
     "folder": "Mods-Ordner",
     "active": "Für neoOMSI verfügbar"
   },
-  "waiting": {
-    "title": "Warten auf ihren Bus",
-    "hint": "Lackierungen für einen Bus, den du noch nicht hast. Sie installieren sich, sobald er da ist."
+  "plugins": {
+    "label": "Plugins",
+    "allow": "Plugins von {name} erlauben",
+    "hint": "Plugins sind Programmcode, der im Spiel läuft. Erlaube sie nur für Mods, denen du vertraust. Wirkt ab dem nächsten Spielstart."
+  },
+  "unreadable": "Das Spiel kann ihn nicht lesen: {error}",
+  "order": {
+    "title": "Priorität",
+    "hint": "Weiter oben gewinnt: Haben zwei Einträge dieselbe Datei, nimmt das Spiel die des oberen. Ziehe einen Eintrag oder nutze die Pfeile, dann übernehmen.",
+    "running": "Laufende Spiele behalten die Reihenfolge, mit der sie gestartet wurden.",
+    "unreadable": "Die gespeicherte Ladereihenfolge ist nicht lesbar; es gilt die Standardreihenfolge",
+    "undo": "Zurück",
+    "apply": "Übernehmen",
+    "toTop": "{name} ganz nach oben",
+    "up": "{name} nach oben",
+    "down": "{name} nach unten",
+    "toBottom": "{name} ganz nach unten",
+    "forget": "Vergessen",
+    "forgetHint": "Aus der Ladereihenfolge entfernen. Kommt er zurück, wird er wie ein neuer Mod eingereiht.",
+    "unavailable": "Nicht im Inhaltsordner. Er behält seinen Platz, falls er zurückkommt.",
+    "newMods": "Neu installierte Mods",
+    "newModsHint": "Wohin ein neuer Mod in der Liste kommt. Mods in der Liste verschieben sich nie von selbst.",
+    "top": "Ganz oben",
+    "bottom": "Ganz unten",
+    "reset": "Ladereihenfolge zurücksetzen",
+    "resetHint": "Zurück zur Standardreihenfolge: alphabetisch, wie vor der Ladereihenfolge.",
+    "resetAction": "Zurücksetzen",
+    "resetBody": "Deine Reihenfolge wird durch die Standardreihenfolge ersetzt. Nicht installierte Einträge fallen weg.",
+    "hidden": "Ganz verdeckt von {mods}: keine seiner Dateien wird genutzt",
+    "overridden": "{n} Dateien verdeckt von {mods}",
+    "overrides": "Ersetzt {n} Dateien von {mods}",
+    "replaces": "Ersetzt {n} Originaldateien von OMSI 2",
+    "clash": "Ein anderer Bus nutzt denselben Ordner: {clash}",
+    "renamed": "Umbenannt in {name}?",
+    "takePlace": "Diesen Platz übernehmen"
   }
 }

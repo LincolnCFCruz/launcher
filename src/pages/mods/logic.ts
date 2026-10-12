@@ -3,7 +3,6 @@ import {
   InstallState,
   type InstallProgress,
   type InstalledMod,
-  type ModsStatus,
   type SourceInfo,
 } from '../../types/launcher';
 
@@ -69,29 +68,44 @@ export function canInstall(info: SourceInfo, mode: InstallMode): boolean {
 export const autoTakes = (info: SourceInfo) =>
   info.suggested === InstallMode.IN_PLACE ? InstallMode.IN_PLACE : InstallMode.EXTRACT;
 
-export function filterInstalled(mods: InstalledMod[], query: string): InstalledMod[] {
-  const q = query.trim().toLowerCase();
-  return mods
-    .filter(
-      (m) =>
-        !q ||
-        m.name.toLowerCase().includes(q) ||
-        m.folders.some((f) => f.toLowerCase().includes(q)),
-    )
-    .sort((a, b) => b.installed - a.installed || a.name.localeCompare(b.name));
+export function move<T>(list: readonly T[], from: number, to: number): T[] {
+  const next = [...list];
+  const [item] = next.splice(from, 1);
+  next.splice(Math.max(0, Math.min(to, next.length)), 0, item);
+  return next;
 }
 
-export const usedInPlace = (mod: InstalledMod) =>
-  mod.folders.length > 0 && mod.folders.every((f) => /^Archives[\\/]/i.test(f));
+/** The unsaved order without gone entries, with new ones where the engine lists them. */
+export function mergeDraft(draft: readonly string[], listed: readonly string[]): string[] {
+  const kept = draft.filter((n) => listed.includes(n));
+  for (const [i, n] of listed.entries()) if (!kept.includes(n)) kept.splice(i, 0, n);
+  return kept;
+}
+
+const looseName = (name: string) =>
+  name
+    .replace(/\.zip$/i, '')
+    .toLowerCase()
+    .replace(/[^a-z]/g, '');
+
+/** The one available entry named like `gone`, ignoring case, digits and punctuation. */
+export function renamedAs(gone: string, available: readonly string[]): string | undefined {
+  const key = looseName(gone);
+  const like = available.filter((n) => n !== gone && key && looseName(n) === key);
+  return like.length === 1 ? like[0] : undefined;
+}
+
+export const removable = (mod: InstalledMod) => mod.available && !mod.name.startsWith('Archives/');
 
 export const fileName = (path: string) => path.split(/[\\/]/).filter(Boolean).pop() ?? path;
+
+const stem = (name: string) => name.replace(/\.(zip|7z|rar)$/i, '').toLowerCase();
+
+export const installedAs = (mods: InstalledMod[], path: string) =>
+  mods.find((m) => stem(m.name) === stem(fileName(path)));
 
 export function enqueue(queue: string[], paths: string[]): string[] {
   const next = [...queue];
   for (const p of paths) if (p && !next.includes(p)) next.push(p);
   return next;
 }
-
-export type Mods = ModsStatus & { installed: InstalledMod[] };
-
-export const readMods = (raw: ModsStatus): Mods => ({ ...raw, installed: raw.installed ?? [] });

@@ -7,9 +7,9 @@ import { errorText, invalidate, useCommand } from '../../lib/engine';
 import { bytes } from '../../lib/format';
 import { useNav, useToast } from '../../lib/nav';
 import { Folders } from './Folders';
-import { Installed } from './Installed';
+import { LoadOrder } from './LoadOrder';
 import { Installing } from './Installing';
-import { enqueue, isRunning, readMods } from './logic';
+import { enqueue, isRunning } from './logic';
 import { Preflight } from './Preflight';
 
 type Section = 'installed' | 'installing' | 'folders';
@@ -30,7 +30,7 @@ export const ModsPage: React.FC = () => {
   const [handled, setHandled] = useState(0);
   const [dragging, setDragging] = useState(false);
   const depth = useRef(0);
-  const data = mods.data ? readMods(mods.data) : null;
+  const data = mods.data ?? null;
   const section: Section =
     route.section === 'installing' || route.section === 'folders' ? route.section : 'installed';
   const running = data?.jobs.filter(isRunning).length ?? 0;
@@ -96,7 +96,7 @@ export const ModsPage: React.FC = () => {
   };
 
   const counts: Record<Section, number | null> = {
-    installed: data ? data.inboxItems.length : null,
+    installed: data ? data.installed.length : null,
     installing: running || null,
     folders: null,
   };
@@ -183,7 +183,7 @@ export const ModsPage: React.FC = () => {
           ) : section === 'folders' ? (
             <Folders mods={data} onOpen={open} />
           ) : (
-            <Installed mods={data.installed} mounted={data.inboxItems} cleaned={data.cleaned} />
+            <LoadOrder mods={data} />
           )}
         </div>
       </PanelScreen>
@@ -200,6 +200,7 @@ export const ModsPage: React.FC = () => {
         <Preflight
           key={queue[0]}
           path={queue[0]}
+          installed={data?.installed ?? []}
           position={handled + 1}
           total={handled + queue.length}
           onStarted={() => go('mods', 'installing')}

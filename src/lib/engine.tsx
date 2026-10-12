@@ -22,9 +22,14 @@ const AFFECTS: Partial<Record<Command, Command[]>> = {
   saveKeybindings: ['keybindings'],
   saveServers: ['servers'],
   startInstall: ['mods'],
+  saveModOrder: ['mods', 'modConflicts', 'maps', 'vehicles', 'weather'],
+  resetModOrder: ['mods', 'modConflicts', 'maps', 'vehicles', 'weather'],
+  forgetMod: ['mods'],
+  dismissDiagnostic: ['diagnostics', 'preflight'],
   cancelInstall: ['mods'],
   clearInstalls: ['mods'],
-  uninstallMod: ['mods', 'maps', 'vehicles', 'weather'],
+  uninstallMod: ['mods', 'modConflicts', 'maps', 'vehicles', 'weather'],
+  allowModPlugins: ['mods'],
   launch: ['instances'],
   stop: ['instances'],
 };
@@ -85,7 +90,16 @@ const LogsContext = createContext<{ logs: string[]; clearLogs: () => void }>({
 
 export const useLogs = () => useContext(LogsContext);
 
-const CONTENT: Command[] = ['maps', 'vehicles', 'weather', 'lines', 'situations', 'mods'];
+const CONTENT: Command[] = [
+  'maps',
+  'vehicles',
+  'weather',
+  'lines',
+  'situations',
+  'mods',
+  'modConflicts',
+  'preflight',
+];
 
 export function EngineProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<EngineStatus>({
@@ -112,8 +126,11 @@ export function EngineProvider({ children }: { children: ReactNode }) {
     const unsubStatus = window.neoomsi.onEngineStatus(setStatus);
     const unsubLogs = window.neoomsi.onDiagnosticLog(log);
     const unsubEvents = window.neoomsi.onEngineEvent((event: EngineEvent) => {
-      if (event.case === 'instancesChanged') setInstances(event.value.instances);
-      else if (event.case === 'installsChanged') invalidate('mods');
+      if (event.case === 'instancesChanged') {
+        setInstances(event.value.instances);
+        // a game writes what it missed once it has loaded, and when it ends
+        invalidate('diagnostics');
+      } else if (event.case === 'installsChanged') invalidate('mods');
       else if (event.case === 'contentChanged') invalidate(...CONTENT);
       else if (event.case === 'paxPackChanged') invalidate('paxPack');
     });

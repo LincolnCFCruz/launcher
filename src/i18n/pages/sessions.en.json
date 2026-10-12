@@ -62,5 +62,16 @@
   "views": {
     "running": "Running",
     "history": "History"
+  },
+  "missing": {
+    "title": "Missing content",
+    "show": "Show the missing content",
+    "hint": "Install or re-enable what is named, or check the load order. Files missing inside a mod usually need a new copy of that mod.",
+    "missing_dependency": "{requester} needs {pack}, which is not installed ({count} files)",
+    "inactive_dependency": "{requester} needs {pack}: it is in {provider}, which is uninstalled ({count} files)",
+    "incomplete_pack": "{requester} needs files that {provider} does not have in {pack} - perhaps another version ({count} files)",
+    "incomplete_mod": "{requester} lacks some of its own files in {pack} ({count} files)",
+    "missing_file": "{requester}: {count} files not found",
+    "dismiss": "Do not show this again"
   }
 }

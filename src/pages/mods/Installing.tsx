@@ -119,7 +119,6 @@ function FinishedRow({ job }: { job: InstallProgress }) {
   const meta = [
     t(`mods.state.${stateKey(job.state)}`),
     t(`mods.modeName.${modeKey(job.mode)}`),
-    job.fromInbox ? t('mods.jobs.fromInbox') : null,
     ago(job.finished ?? job.started),
   ].filter(Boolean);
 
@@ -172,10 +171,6 @@ function Details({ job }: { job: InstallProgress }) {
     ...job.installed.map((folder) => ({
       icon: 'check',
       text: t('mods.jobs.installed', { folder }),
-    })),
-    ...job.keptAside.map((name) => ({
-      icon: 'hourglass_top',
-      text: t('mods.jobs.keptAside', { name }),
     })),
   ];
   return (

@@ -5,10 +5,10 @@ import { SearchField } from '../../components/Screen';
 import { t } from '../../i18n';
 import { bytes, number } from '../../lib/format';
 import { filterBy, LONG_LIST } from '../../lib/search';
-import type { Mods } from './logic';
+import type { ModsStatus } from '../../types/launcher';
 import { Title } from './Title';
 
-export const Folders: React.FC<{ mods: Mods; onOpen: (path: string) => void }> = ({
+export const Folders: React.FC<{ mods: ModsStatus; onOpen: (path: string) => void }> = ({
   mods,
   onOpen,
 }) => {
@@ -16,10 +16,9 @@ export const Folders: React.FC<{ mods: Mods; onOpen: (path: string) => void }> =
   const empty = mods.folders.filter((f) => f.entries === 0n).map((f) => f.folder);
   const [query, setQuery] = useState('');
   const mounted = filterBy(mods.inboxItems, query, (item) => [item]);
-  const waiting = filterBy(mods.waiting, query, (w) => [w]);
   const archives = filterBy(mods.archives, query, (a) => [a.name]);
-  const total = mods.inboxItems.length + mods.waiting.length + mods.archives.length;
-  const matches = mounted.length + waiting.length + archives.length;
+  const total = mods.inboxItems.length + mods.archives.length;
+  const matches = mounted.length + archives.length;
 
   return (
     <>
@@ -56,14 +55,6 @@ export const Folders: React.FC<{ mods: Mods; onOpen: (path: string) => void }> =
       {total > 0 && matches === 0 && (
         <ListGroup>
           <ListRow label={t('common.noMatch', { query: query.trim() })} />
-        </ListGroup>
-      )}
-
-      {waiting.length > 0 && (
-        <ListGroup title={t('mods.waiting.title')} hint={t('mods.waiting.hint')}>
-          {waiting.map((w) => (
-            <ItemRow key={w} icon="directions_bus" label={w} />
-          ))}
         </ListGroup>
       )}
 

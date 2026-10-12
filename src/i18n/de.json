@@ -262,6 +262,10 @@
       "update": "Aktualisieren",
       "whatsNew": "Was ist neu",
       "hideChanges": "Änderungen ausblenden"
+    },
+    "map": {
+      "contentMissing": "Diese Karte braucht Inhalte, die nicht installiert sind",
+      "details": "Details"
     }
   },
   "window": {

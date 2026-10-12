@@ -263,6 +263,10 @@
       "update": "Update",
       "whatsNew": "What's new",
       "hideChanges": "Hide changes"
+    },
+    "map": {
+      "contentMissing": "This map needs content that is not installed",
+      "details": "Details"
     }
   },
   "window": {
