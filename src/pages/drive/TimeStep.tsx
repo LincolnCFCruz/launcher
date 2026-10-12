@@ -58,6 +58,42 @@ export function weatherIcon(choice: Choice, presets: WeatherInfo[]): string {
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
+export const is24HourTime = (value: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+
+export const format24HourTime = (value: string) => {
+  const digits = value.replace(/\D/g, '').slice(0, 4);
+  return digits.length === 4 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : value;
+};
+
+const TwentyFourHourTime: React.FC<{ value: string; onChange: (value: string) => void }> = ({
+  value,
+  onChange,
+}) => {
+  const [draft, setDraft] = React.useState(value);
+  React.useEffect(() => setDraft(value), [value]);
+  const commit = () => {
+    if (is24HourTime(draft)) onChange(draft);
+    else setDraft(value);
+  };
+  return (
+    <input
+      type="text"
+      className="input font-mono tabular-nums"
+      inputMode="numeric"
+      maxLength={5}
+      placeholder="HH:MM"
+      pattern="([01][0-9]|2[0-3]):[0-5][0-9]"
+      aria-label="24-hour time"
+      value={draft}
+      onChange={(e) =>
+        setDraft(format24HourTime(e.target.value.replace(/[^0-9:]/g, '').slice(0, 5)))
+      }
+      onBlur={commit}
+      onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+    />
+  );
+};
+
 function now(): Pick<Choice, 'time' | 'date' | 'season'> {
   const d = new Date();
   return {
@@ -116,11 +152,9 @@ export const TimeStep: React.FC<{ data: DriveData }> = ({ data }) => {
       <section>
         <div className="relative grid grid-cols-2 gap-x-6 gap-y-5">
           <Field label={t('drive.time.time')}>
-            <input
-              type="time"
-              className="input"
+            <TwentyFourHourTime
               value={choice.time}
-              onChange={(e) => update({ time: e.target.value, trip: '' })}
+              onChange={(time) => update({ time, trip: '' })}
             />
           </Field>
           <Field label={t('drive.time.date')}>
