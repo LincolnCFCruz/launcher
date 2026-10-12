@@ -3,6 +3,7 @@ import {
   CancelledSchema,
   ConfigSchema,
   ControllerListSchema,
+  DiagnosticClass,
   DiagnosticListSchema,
   EmptySchema,
   EngineVersionSchema,
@@ -22,6 +23,7 @@ import {
   MapListSchema,
   ModConflictListSchema,
   ModsStatusSchema,
+  NewMods,
   OptionPresetListSchema,
   PaxPackSchema,
   PaxState,
@@ -29,6 +31,7 @@ import {
   ServerInfoSchema,
   ServerListSchema,
   SettingsSchema,
+  Severity,
   SituationListSchema,
   SourceInfoSchema,
   StoppedSchema,
@@ -275,39 +278,52 @@ export class MockLauncher {
     saveModOrder: ({ order, revision, newMods }) => {
       this.checkRevision(revision);
       const listed = (order ?? []).flatMap(
-        (n) => this.installedMods.find((m) => m.name === n) ?? [],
+        (name) => this.installedMods.find((entry) => entry.name === name) ?? [],
       );
-      this.installedMods = [...listed, ...this.installedMods.filter((m) => !listed.includes(m))];
-      this.newMods = newMods === 'bottom' ? 'bottom' : 'top';
+      this.installedMods = [
+        ...listed,
+        ...this.installedMods.filter((entry) => !listed.includes(entry)),
+      ];
+      this.newMods = newMods === NewMods.BOTTOM ? NewMods.BOTTOM : NewMods.TOP;
       this.orderRevision += 1n;
       return this.modsStatus();
     },
     resetModOrder: ({ revision }) => {
       this.checkRevision(revision);
       this.installedMods = this.installedMods
-        .filter((m) => m.available)
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .filter((entry) => entry.available)
+        .sort((left, right) => left.name.localeCompare(right.name));
       this.orderRevision += 1n;
       return this.modsStatus();
     },
     forgetMod: ({ name }) => {
-      this.installedMods = this.installedMods.filter((m) => m.name !== name);
+      this.installedMods = this.installedMods.filter((entry) => entry.name !== name);
       this.orderRevision += 1n;
       return this.modsStatus();
     },
-    modConflicts: () =>
-      create(ModConflictListSchema, {
-        mods: this.installedMods
-          .filter((m) => m.available)
-          .map((m, i) => ({
-            name: m.name,
+    modConflicts: () => {
+      const available = this.installedMods.filter((entry) => entry.available);
+      const [first, second] = available.map((entry) => entry.name);
+      return create(ModConflictListSchema, {
+        mods: available
+          .map((entry, index) => ({
+            name: entry.name,
             files: 120,
-            overrides: i === 0 ? 14 : 0,
-            overridden: i === 1 ? 14 : 0,
-            hiddenBy: i === 1 ? [this.installedMods[0].name] : [],
-            overridesMods: i === 0 && this.installedMods[1] ? [this.installedMods[1].name] : [],
-          })),
-      }),
+            overrides: index === 0 ? 14 : 0,
+            overridden: index === 1 ? 14 : 0,
+            hiddenBy: index === 1 ? [first] : [],
+            overridesMods: index === 0 && second ? [second] : [],
+          }))
+          .concat({
+            name: 'shared',
+            files: 8,
+            overrides: 0,
+            overridden: 2,
+            hiddenBy: first ? [first] : [],
+            overridesMods: [],
+          }),
+      });
+    },
     modinfo: ({ path }) => modInfo(path ?? ''),
     startInstall: ({ path, mode, replace }) =>
       this.install(path ?? '', mode ?? InstallMode.AUTO, replace ?? false),
@@ -324,10 +340,10 @@ export class MockLauncher {
       return create(EmptySchema);
     },
     uninstallMod: ({ name }) => {
-      if (!this.installedMods.some((m) => m.name === name)) {
+      if (!this.installedMods.some((entry) => entry.name === name)) {
         throw new Error(`'${name}' is not an installed mod`);
       }
-      this.installedMods = this.installedMods.filter((m) => m.name !== name);
+      this.installedMods = this.installedMods.filter((entry) => entry.name !== name);
       return create(EmptySchema);
     },
     allowModPlugins: ({ name, allowed }) => {
@@ -545,20 +561,20 @@ export class MockLauncher {
   private replacing = new Set<bigint>();
   private orderRevision = 0n;
   private dismissed = new Set<string>();
-  private newMods = 'top';
+  private newMods = NewMods.TOP;
 
   private findings() {
     return [
       {
-        class: 'missing_dependency',
+        class: DiagnosticClass.MISSING_DEPENDENCY,
         requester: 'Westfeld_1989',
         pack: 'Sceneryobjects/Westfeld_Haltestellen',
-        severity: 'required',
+        severity: Severity.REQUIRED,
         count: 12,
         samples: ['Sceneryobjects/Westfeld_Haltestellen/hst.sco'],
         key: 'westfeld-hst',
       },
-    ].filter((f) => !this.dismissed.has(f.key));
+    ].filter((finding) => !this.dismissed.has(finding.key));
   }
 
   private modsStatus() {
@@ -566,7 +582,7 @@ export class MockLauncher {
       ...MODS,
       jobs: this.jobs,
       installed: this.installedMods,
-      inboxItems: this.installedMods.filter((m) => m.available).map((m) => m.name),
+      inboxItems: this.installedMods.filter((entry) => entry.available).map((entry) => entry.name),
       orderRevision: this.orderRevision,
       newMods: this.newMods,
     });
@@ -626,8 +642,10 @@ export class MockLauncher {
     const files = Number(job.filesTotal) || Math.max(12, Math.round(bytes / 2_600_000));
     const inPlace = job.mode === InstallMode.IN_PLACE;
     const entry = inPlace ? `${job.name}.zip` : job.name;
-    const stem = (n: string) => n.replace(/\.zip$/i, '').toLowerCase();
-    const existing = this.installedMods.filter((m) => stem(m.name) === job.name.toLowerCase());
+    const stem = (name: string) => name.replace(/\.zip$/i, '').toLowerCase();
+    const existing = this.installedMods.filter(
+      (installed) => stem(installed.name) === job.name.toLowerCase(),
+    );
     if (tick === 1 && existing.length > 0 && !this.replacing.has(job.id)) {
       job.state = InstallState.FAILED;
       job.message = `mod '${job.name}' is already installed - install it with Replace to update it`;
@@ -659,11 +677,11 @@ export class MockLauncher {
         size: inPlace ? BigInt(bytes) : 0n,
         inPlace,
       });
-      // an update keeps its place; a new mod goes where the player wants new mods
-      const slot = this.installedMods.findIndex((m) => existing.includes(m));
-      const rest = this.installedMods.filter((m) => !existing.includes(m));
+      // An update keeps its place; a new mod goes where the player wants new mods.
+      const slot = this.installedMods.findIndex((other) => existing.includes(other));
+      const rest = this.installedMods.filter((other) => !existing.includes(other));
       if (slot >= 0) rest.splice(slot, 0, installed);
-      else if (this.newMods === 'bottom') rest.push(installed);
+      else if (this.newMods === NewMods.BOTTOM) rest.push(installed);
       else rest.unshift(installed);
       this.installedMods = rest;
     }

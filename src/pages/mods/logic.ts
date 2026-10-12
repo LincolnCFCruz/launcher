@@ -75,10 +75,12 @@ export function move<T>(list: readonly T[], from: number, to: number): T[] {
   return next;
 }
 
-/** The unsaved order without gone entries, with new ones where the engine lists them. */
+/** The unsaved order without the entries that are gone, plus new ones where the engine lists them. */
 export function mergeDraft(draft: readonly string[], listed: readonly string[]): string[] {
-  const kept = draft.filter((n) => listed.includes(n));
-  for (const [i, n] of listed.entries()) if (!kept.includes(n)) kept.splice(i, 0, n);
+  const kept = draft.filter((name) => listed.includes(name));
+  for (const [index, name] of listed.entries()) {
+    if (!kept.includes(name)) kept.splice(index, 0, name);
+  }
   return kept;
 }
 
@@ -88,10 +90,10 @@ const looseName = (name: string) =>
     .toLowerCase()
     .replace(/[^a-z]/g, '');
 
-/** The one available entry named like `gone`, ignoring case, digits and punctuation. */
+/** The only available entry named like `gone`, ignoring case, digits and punctuation. */
 export function renamedAs(gone: string, available: readonly string[]): string | undefined {
   const key = looseName(gone);
-  const like = available.filter((n) => n !== gone && key && looseName(n) === key);
+  const like = available.filter((name) => name !== gone && key && looseName(name) === key);
   return like.length === 1 ? like[0] : undefined;
 }
 
@@ -102,7 +104,7 @@ export const fileName = (path: string) => path.split(/[\\/]/).filter(Boolean).po
 const stem = (name: string) => name.replace(/\.(zip|7z|rar)$/i, '').toLowerCase();
 
 export const installedAs = (mods: InstalledMod[], path: string) =>
-  mods.find((m) => stem(m.name) === stem(fileName(path)));
+  mods.find((entry) => stem(entry.name) === stem(fileName(path)));
 
 export function enqueue(queue: string[], paths: string[]): string[] {
   const next = [...queue];

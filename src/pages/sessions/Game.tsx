@@ -11,7 +11,7 @@ import { GameLinkState, LanRole, type Instance } from '../../types/launcher';
 import { useNames } from '../profile/names';
 import { clock, exitCodeText, exitState } from './clock';
 import { LogView } from './LogView';
-import { MissingContent } from './MissingContent';
+import { MissingContent } from '../../components/MissingContent';
 
 export function duty(line: string | null | undefined, tour: string | null | undefined) {
   if (!line) return t('sessions.freeDrive');
@@ -129,7 +129,7 @@ export const Game: React.FC<{ instance: Instance; now: number }> = ({ instance: 
               aria-label={t('sessions.missing.show')}
               title={t('sessions.missing.show')}
               aria-expanded={missing}
-              onClick={() => setMissing((v) => !v)}
+              onClick={() => setMissing((shown) => !shown)}
             >
               <Icon name="warning" size={18} />
               <span className="text-[14px] tabular-nums">{findings.length}</span>

@@ -13,6 +13,7 @@ import {
   MinimapSchema,
   MinimapStopSchema,
   ModsStatusSchema,
+  NewMods,
   ProfileSchema,
   ServerInfoSchema,
   SessionSchema,
@@ -653,7 +654,8 @@ export const MODS: ModsStatus = create(ModsStatusSchema, {
     hasPlugins,
     available: true,
   })),
-  newMods: 'top',
+  newMods: NewMods.TOP,
+  sharedDir: 'C:\\Users\\player\\.neoomsi\\content\\mods\\shared',
   archives: [],
   freeBytes: 214_000_000_000n,
   cleaned: [

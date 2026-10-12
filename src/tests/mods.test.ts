@@ -19,6 +19,7 @@ import {
   InstalledModSchema,
   InstallProgressSchema,
   InstallState,
+  NewMods,
   SourceInfoSchema,
 } from '../types/launcher';
 
@@ -100,7 +101,7 @@ describe('mods logic', () => {
   });
 
   it('keeps an unsaved order in step with what the engine lists', () => {
-    // the player moved c to the top; meanwhile b was uninstalled and n installed (at the top)
+    // The player moved c to the top while b was uninstalled and n was installed at the top.
     expect(mergeDraft(['c', 'a', 'b'], ['n', 'a', 'c'])).toEqual(['n', 'c', 'a']);
   });
 
@@ -159,32 +160,36 @@ describe('mock mods engine', () => {
 
     const again = await engine.handle('startInstall', { path: 'C:\\Citaro_K.zip' });
     engine.advanceJobs();
-    const failed = (await engine.handle('mods', {})).jobs.find((x) => x.id === again.id)!;
+    const failed = (await engine.handle('mods', {})).jobs.find((job) => job.id === again.id)!;
     expect(failed.state).toBe(InstallState.FAILED);
 
     await engine.handle('uninstallMod', { name: 'Citaro_K' });
-    expect((await engine.handle('mods', {})).installed.some((m) => m.name === 'Citaro_K')).toBe(
-      false,
-    );
+    expect(
+      (await engine.handle('mods', {})).installed.some((entry) => entry.name === 'Citaro_K'),
+    ).toBe(false);
   });
 
   it('keeps the player order and places new mods where the player wants them', async () => {
     const engine = new MockLauncher();
     const before = await engine.handle('mods', {});
-    const order = before.installed.map((m) => m.name).reverse();
+    const order = before.installed.map((entry) => entry.name).reverse();
     expect(() =>
-      engine.handle('saveModOrder', { order, revision: before.orderRevision + 1n, newMods: 'top' }),
+      engine.handle('saveModOrder', {
+        order,
+        revision: before.orderRevision + 1n,
+        newMods: NewMods.TOP,
+      }),
     ).toThrow('changed elsewhere');
     const saved = await engine.handle('saveModOrder', {
       order,
       revision: before.orderRevision,
-      newMods: 'bottom',
+      newMods: NewMods.BOTTOM,
     });
-    expect(saved.installed.map((m) => m.name)).toEqual(order);
+    expect(saved.installed.map((entry) => entry.name)).toEqual(order);
     await engine.handle('startInstall', { path: 'C:\\New_Bus.zip', mode: InstallMode.EXTRACT });
-    for (let i = 0; i < 12; i++) engine.advanceJobs();
-    const after = (await engine.handle('mods', {})).installed.map((m) => m.name);
-    // (the install that was already running finishes too: also at the bottom)
+    for (let tick = 0; tick < 12; tick++) engine.advanceJobs();
+    const after = (await engine.handle('mods', {})).installed.map((entry) => entry.name);
+    // The install that was already running finishes too, also at the bottom.
     expect(after.slice(0, order.length)).toEqual(order);
     expect(after.at(-1)).toBe('New_Bus');
   });

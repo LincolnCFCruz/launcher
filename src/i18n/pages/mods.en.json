@@ -126,8 +126,11 @@
     "overridden": "{n} files hidden by {mods}",
     "overrides": "Replaces {n} files of {mods}",
     "replaces": "Replaces {n} original OMSI 2 files",
-    "clash": "Another bus uses the same folder: {clash}",
+    "clash": "{mod} uses the folder Vehicles/{folder} for another bus",
     "renamed": "Renamed to {name}?",
-    "takePlace": "Give it this place"
+    "takePlace": "Give it this place",
+    "shared": "Shared library",
+    "sharedHint": "Always last: its files are used only where no mod has them. Plugins in it never load.",
+    "sharedOpen": "Open the shared folder"
   }
 }

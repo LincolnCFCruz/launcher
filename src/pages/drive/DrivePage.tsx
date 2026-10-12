@@ -23,7 +23,7 @@ import { PassengerPromo } from './Promo';
 import { RoadbookStep } from './RoadbookStep';
 import { RouteStep } from './RouteStep';
 import { TimeStep, weatherIcon, weatherLabel } from './TimeStep';
-import { MissingContent } from '../sessions/MissingContent';
+import { MissingContent } from '../../components/MissingContent';
 
 const STEPS = ['route', 'bus', 'time', 'roadbook'] as const;
 type Step = (typeof STEPS)[number];
@@ -266,7 +266,7 @@ function Home({
   const p = picked(data, choice);
   const missing = useCommand('preflight', choice.map ? { map: choice.map } : null).data?.findings;
   const [missingOpen, setMissingOpen] = useState(false);
-  const missingPacks = [...new Set((missing ?? []).map((f) => f.pack).filter(Boolean))];
+  const missingPacks = [...new Set((missing ?? []).map((finding) => finding.pack).filter(Boolean))];
   const rows: [Step, string, string][] = [
     ['route', p.map?.friendly ?? '–', dutyLabel(choice, data, p)],
     ['bus', p.bus?.name ?? t('drive.summary.noBus'), choice.paint || p.bus?.defaultPaint || ''],
@@ -319,7 +319,7 @@ function Home({
                 type="button"
                 className="code-action shrink-0"
                 aria-expanded={missingOpen}
-                onClick={() => setMissingOpen((v) => !v)}
+                onClick={() => setMissingOpen((open) => !open)}
               >
                 {t('drive.map.details')}
               </button>

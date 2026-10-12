@@ -126,8 +126,11 @@
     "overridden": "{n} Dateien verdeckt von {mods}",
     "overrides": "Ersetzt {n} Dateien von {mods}",
     "replaces": "Ersetzt {n} Originaldateien von OMSI 2",
-    "clash": "Ein anderer Bus nutzt denselben Ordner: {clash}",
+    "clash": "{mod} nutzt den Ordner Vehicles/{folder} für einen anderen Bus",
     "renamed": "Umbenannt in {name}?",
-    "takePlace": "Diesen Platz übernehmen"
+    "takePlace": "Diesen Platz übernehmen",
+    "shared": "Gemeinsame Bibliothek",
+    "sharedHint": "Immer zuletzt: Ihre Dateien werden nur genutzt, wo kein Mod sie hat. Plugins darin werden nie geladen.",
+    "sharedOpen": "Gemeinsamen Ordner öffnen"
   }
 }

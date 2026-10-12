@@ -266,7 +266,7 @@ registerIpcHandler('engine:preview-model', async (_, bus: string, paint: string)
   return new Uint8Array(await readFile(path));
 });
 
-// The engine reads it from whichever content root has the map (a mod's folder or archive too).
+// The engine reads the picture from whichever content root has the map, mods included.
 registerIpcHandler('engine:map-picture', async (_, mapFile: string) => {
   const picture = await requireEngine().sendRequest<Uint8Array>('mapPicture', { map: mapFile });
   return picture.length > 0 ? picture : null;

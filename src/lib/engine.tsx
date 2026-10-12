@@ -128,7 +128,7 @@ export function EngineProvider({ children }: { children: ReactNode }) {
     const unsubEvents = window.neoomsi.onEngineEvent((event: EngineEvent) => {
       if (event.case === 'instancesChanged') {
         setInstances(event.value.instances);
-        // a game writes what it missed once it has loaded, and when it ends
+        // A game writes what it couldn't find after loading, and again when it ends.
         invalidate('diagnostics');
       } else if (event.case === 'installsChanged') invalidate('mods');
       else if (event.case === 'contentChanged') invalidate(...CONTENT);
