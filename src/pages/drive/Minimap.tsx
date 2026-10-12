@@ -90,9 +90,13 @@ export const Minimap: React.FC<{
 
   const home = useMemo<Box>(() => {
     const focus = [...routeStops.map((s) => [s.x, s.y] as [number, number]), ...path.points];
+    const places = [
+      ...data.entries.map((e) => [e.x, e.y] as [number, number]),
+      ...data.stops.map((s) => [s.x, s.y] as [number, number]),
+    ];
     const all = data.roads.flatMap((r) => r.points.map(({ x, y }) => [x, y] as [number, number]));
     return (
-      bounds(focus.length > 1 ? focus : all, focus.length > 1 ? 260 : 60) ?? [
+      bounds(focus.length ? focus : places.length ? places : all, focus.length ? 260 : 60) ?? [
         -500, -500, 1000, 1000,
       ]
     );
