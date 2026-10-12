@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, type RefObject } from 'react';
 import { Icon } from '../../components/Icon';
-import { Notice, Spinner } from '../../components/ui';
+import { Notice, Select, Spinner } from '../../components/ui';
 import { t } from '../../i18n';
 import { call, errorText, useCommand, useEngine } from '../../lib/engine';
 import { resolvedMetarStation, seasonOf, toDuty, useDuty, type Choice } from '../../lib/duty';
@@ -477,7 +477,18 @@ function BusHeader({ p, ref }: { p: Picked; ref?: React.Ref<HTMLDivElement> }) {
             <Icon name="chevron_left" size={20} />
           </button>
         )}
-        <span className="truncate">{choice.paint || p.bus?.defaultPaint}</span>
+        {paints.length > 1 ? (
+          <Select
+            value={choice.paint || p.bus?.defaultPaint || ''}
+            options={paints.map((paint) => [paint, paint] as const)}
+            onChange={(paint) => update({ paint })}
+            label={t('drive.bus.livery')}
+            className="select-inline"
+            menuWidth={320}
+          />
+        ) : (
+          <span className="truncate">{choice.paint || p.bus?.defaultPaint}</span>
+        )}
         {paints.length > 1 && (
           <button
             type="button"
