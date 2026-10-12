@@ -228,6 +228,7 @@
       "none": "No duty chosen",
       "noneHint": "Pick a line and a tour under Map & route to get a roadbook.",
       "startTrip": "Start at trip",
+      "wholeTour": "Continue with the rest of the tour",
       "ibis": "IBIS",
       "ibisLine": "Line",
       "ibisRoute": "Route"

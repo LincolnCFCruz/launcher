@@ -227,6 +227,7 @@
       "none": "Kein Dienst gewählt",
       "noneHint": "Wähle unter Karte & Strecke eine Linie und einen Umlauf, um ein Fahrtenbuch zu bekommen.",
       "startTrip": "Bei Fahrt beginnen",
+      "wholeTour": "Mit dem restlichen Umlauf fortfahren",
       "ibis": "IBIS",
       "ibisLine": "Linie",
       "ibisRoute": "Route"

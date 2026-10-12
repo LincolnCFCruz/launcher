@@ -37,6 +37,7 @@ export interface Choice {
   line: string;
   tour: string;
   trip: string;
+  wholeTour: boolean;
   time: string;
   date: string;
   season: Season;
@@ -80,6 +81,7 @@ const DEFAULT_CHOICE: Choice = {
   line: '',
   tour: '',
   trip: '',
+  wholeTour: true,
   time: '09:00',
   date: '1989-05-30',
   season: 'auto',
@@ -231,6 +233,7 @@ export function toDuty(
     duty.line = choice.line;
     duty.tour = choice.tour || undefined;
     duty.trip = choice.trip || undefined;
+    duty.wholeTour = choice.wholeTour;
   }
   if (server) duty.lan = `join:${server.address}`;
   else if (choice.lan === 'host') duty.lan = 'host';

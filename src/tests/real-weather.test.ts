@@ -15,6 +15,7 @@ const choice = (patch: Partial<Choice> = {}): Choice => ({
   line: '',
   tour: '',
   trip: '',
+  wholeTour: true,
   time: '09:00',
   date: '1989-05-30',
   season: 'auto',
@@ -55,5 +56,11 @@ describe('real weather', () => {
   it('does not send unresolved ICAOs to the game', () => {
     expect(toDuty(choice(), 'default', null).weather).toBe('');
     expect(toDuty(choice(), 'default', null, station('EGNX')).weather).toBe('metar-once:EGNX');
+  });
+
+  it('continues a selected trip with its tour unless single-trip mode is chosen', () => {
+    const selected = choice({ free: false, line: '402', tour: '1', trip: '2' });
+    expect(toDuty(selected, 'default', null).wholeTour).toBe(true);
+    expect(toDuty({ ...selected, wholeTour: false }, 'default', null).wholeTour).toBe(false);
   });
 });

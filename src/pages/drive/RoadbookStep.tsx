@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Icon } from '../../components/Icon';
 import { SearchField } from '../../components/Screen';
-import { EmptyState } from '../../components/ui';
+import { EmptyState, Switch } from '../../components/ui';
 import { t } from '../../i18n';
 import { useCommand } from '../../lib/engine';
 import { useDuty } from '../../lib/duty';
@@ -74,6 +74,10 @@ function Trips({ tour }: { tour: TourInfo }) {
           </button>
         ))}
       </div>
+      <label className="mt-4 flex items-center justify-between gap-6 py-1 text-[15px]">
+        <span>{t('drive.roadbook.wholeTour')}</span>
+        <Switch checked={choice.wholeTour} onChange={(wholeTour) => update({ wholeTour })} />
+      </label>
     </section>
   );
 }
