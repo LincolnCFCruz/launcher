@@ -15,6 +15,7 @@ export function Select<T extends string | number>({
   className = '',
   disabled,
   label,
+  menuWidth = 0,
 }: {
   value: T;
   options: readonly SelectOption<T>[];
@@ -22,6 +23,8 @@ export function Select<T extends string | number>({
   className?: string;
   disabled?: boolean;
   label?: string;
+  /** The open list's least width (px); it is otherwise as wide as the field. */
+  menuWidth?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -40,7 +43,12 @@ export function Select<T extends string | number>({
     if (!open || !button.current) return;
     const r = button.current.getBoundingClientRect();
     const up = window.innerHeight - r.bottom < 300 && r.top > window.innerHeight - r.bottom;
-    setPlace({ left: r.left, top: up ? r.top - 6 : r.bottom + 6, width: r.width, up });
+    setPlace({
+      left: r.left,
+      top: up ? r.top - 6 : r.bottom + 6,
+      width: Math.max(r.width, menuWidth),
+      up,
+    });
     setQuery('');
     setActive(
       Math.max(

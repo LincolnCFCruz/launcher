@@ -343,6 +343,15 @@
   .select[aria-expanded='true'] {
     background-color: var(--field-hover);
   }
+  .select.select-inline {
+    @apply w-auto max-w-[28rem] rounded-lg py-1 pr-8 pl-2;
+    background-color: transparent;
+    background-position: right 0.4rem center;
+  }
+  .select.select-inline:hover:not(:disabled),
+  .select.select-inline[aria-expanded='true'] {
+    background-color: var(--field);
+  }
   .menu {
     @apply fixed z-50 max-h-[18rem] overflow-y-auto rounded-2xl p-1.5;
     background: var(--menu);

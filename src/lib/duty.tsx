@@ -211,6 +211,9 @@ export function toDuty(
     number: choice.number || undefined,
     plate: choice.plate || undefined,
     entry: choice.entry,
+    // A stop selected on the map is an explicit place to start, rather than merely a hint
+    // for the automatic entry-point picker.
+    spawn: choice.stop?.spawn || undefined,
     time: choice.time,
     date: choice.date,
     traffic: choice.traffic,

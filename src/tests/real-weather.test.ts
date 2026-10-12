@@ -63,4 +63,13 @@ describe('real weather', () => {
     expect(toDuty(selected, 'default', null).wholeTour).toBe(true);
     expect(toDuty({ ...selected, wholeTour: false }, 'default', null).wholeTour).toBe(false);
   });
+
+  it('passes a map-preview stop as an explicit spawn point', () => {
+    const duty = toDuty(
+      choice({ stop: { id: 7, name: 'Town Hall', spawn: '123.4,567.8,90' } }),
+      'default',
+      null,
+    );
+    expect(duty.spawn).toBe('123.4,567.8,90');
+  });
 });
