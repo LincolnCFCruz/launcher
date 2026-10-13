@@ -132,6 +132,20 @@ describe('the load order', () => {
     expect(sent('saveModOrder')).toHaveLength(2);
   });
 
+  it('hides mods the search does not match, but moves them in the full order', async () => {
+    const apply = arrange(() => ({}));
+    const search = screen.getByRole('searchbox', { name: t('mods.search') });
+    fireEvent.change(search, { target: { value: 'a' } });
+    expect(screen.queryByRole('button', { name: t('mods.order.up', { name: 'B' }) })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: t('mods.order.toTop', { name: 'A' }) }));
+    fireEvent.click(apply()!);
+    await waitFor(() =>
+      expect(sent('saveModOrder')).toEqual([expect.objectContaining({ order: ['A', 'C', 'B'] })]),
+    );
+    fireEvent.change(search, { target: { value: 'zzz' } });
+    expect(screen.getByText(t('mods.noMatch', { query: 'zzz' }))).toBeTruthy();
+  });
+
   it('saves once while a save is running', async () => {
     let finish = () => {};
     const apply = arrange(() => new Promise<void>((resolve) => (finish = resolve)));
@@ -166,10 +180,10 @@ describe('missing content', () => {
     );
     const items = screen.getAllByRole('listitem').map((item) => item.textContent ?? '');
     expect(items[0]).toContain('Splines/required');
-    expect(items[1]).toContain('Splines/degraded');
-    expect(items[2]).toContain(
+    expect(items[1]).toContain(
       t('sessions.missing.missing_file', { requester: 'Town', count: number(1) }),
     );
+    expect(items[2]).toContain('Splines/degraded');
     fireEvent.click(screen.getAllByRole('button', { name: t('sessions.missing.dismiss') })[0]);
     await waitFor(() => expect(sent('dismissDiagnostic')).toEqual([{ key: 'required' }]));
   });

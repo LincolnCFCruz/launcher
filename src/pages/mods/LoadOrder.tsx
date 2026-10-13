@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Confirm } from '../../components/Dialog';
 import { Icon } from '../../components/Icon';
 import { ListGroup, ListRow } from '../../components/List';
+import { SearchField } from '../../components/Screen';
 import { Notice, Segmented, Switch } from '../../components/ui';
 import { t } from '../../i18n';
 import { call, errorText, invalidate, useCommand, useEngine } from '../../lib/engine';
@@ -25,6 +26,7 @@ export const LoadOrder: React.FC<{ mods: ModsStatus }> = ({ mods }) => {
   const [removing, setRemoving] = useState<InstalledMod | null>(null);
   const [resetting, setResetting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [query, setQuery] = useState('');
 
   const listed = mods.installed.map((entry) => entry.name);
   const names = draft ? mergeDraft(draft, listed) : listed;
@@ -32,6 +34,9 @@ export const LoadOrder: React.FC<{ mods: ModsStatus }> = ({ mods }) => {
   const conflictOf = (name: string) =>
     conflicts.data?.mods.find((conflict) => conflict.name === name);
   const gameRunning = instances.some((instance) => instance.running);
+  const q = query.trim().toLowerCase();
+  // Hides rows without renumbering, so moves still use the full order.
+  const matches = (mod: InstalledMod) => !q || mod.name.toLowerCase().includes(q);
 
   const run = async (request: Promise<unknown>, done?: string) => {
     try {
@@ -74,26 +79,31 @@ export const LoadOrder: React.FC<{ mods: ModsStatus }> = ({ mods }) => {
     <>
       <Title
         action={
-          draft && (
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="btn-quiet h-9 gap-1.5 rounded-full px-4 text-[14.5px]"
-                onClick={() => setDraft(null)}
-              >
-                <Icon name="undo" size={17} />
-                {t('mods.order.undo')}
-              </button>
-              <button
-                type="button"
-                className="btn h-9 rounded-full px-5"
-                disabled={saving}
-                onClick={apply}
-              >
-                {t('mods.order.apply')}
-              </button>
-            </div>
-          )
+          <div className="flex gap-2">
+            {draft && (
+              <>
+                <button
+                  type="button"
+                  className="btn-quiet h-9 gap-1.5 rounded-full px-4 text-[14.5px]"
+                  onClick={() => setDraft(null)}
+                >
+                  <Icon name="undo" size={17} />
+                  {t('mods.order.undo')}
+                </button>
+                <button
+                  type="button"
+                  className="btn h-9 rounded-full px-5"
+                  disabled={saving}
+                  onClick={apply}
+                >
+                  {t('mods.order.apply')}
+                </button>
+              </>
+            )}
+            {names.length > 0 && (
+              <SearchField value={query} onChange={setQuery} placeholder={t('mods.search')} />
+            )}
+          </div>
         }
       >
         {t('mods.sections.installed')}
@@ -118,10 +128,12 @@ export const LoadOrder: React.FC<{ mods: ModsStatus }> = ({ mods }) => {
       <ListGroup title={t('mods.order.title')} hint={t('mods.order.hint')}>
         {names.length === 0 ? (
           <ListRow label={t('mods.none')} hint={t('mods.noneHint')} />
+        ) : !mods.installed.some(matches) ? (
+          <ListRow label={t('mods.noMatch', { query: query.trim() })} />
         ) : (
           names.map((name, index) => {
             const mod = byName.get(name);
-            if (!mod) return null;
+            if (!mod || !matches(mod)) return null;
             return (
               <div
                 key={name}

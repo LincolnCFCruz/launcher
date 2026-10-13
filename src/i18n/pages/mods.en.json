@@ -9,6 +9,8 @@
   "reading": "Reading the content folder…",
   "loadFailed": "Could not read the content folder",
   "cleaned": "Tidied up after an interrupted install",
+  "search": "Search mods",
+  "noMatch": "No mod matches “{query}”",
   "none": "No mods installed yet",
   "noneHint": "Install one with the button on the left, or drop an archive here.",
   "inPlace": "in place",

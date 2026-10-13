@@ -6,7 +6,7 @@ import { useToast } from '../lib/nav';
 import { DiagnosticClass, Severity, type Diagnostic } from '../types/launcher';
 import { Icon } from './Icon';
 
-// Most serious first.
+// Ties on severity: most serious cause first.
 const CLASSES = [
   DiagnosticClass.MISSING_DEPENDENCY,
   DiagnosticClass.INACTIVE_DEPENDENCY,
@@ -21,7 +21,7 @@ export const MissingContent: React.FC<{ findings: Diagnostic[] }> = ({ findings 
     call('dismissDiagnostic', { key }).catch((err) => toast(errorText(err), 'caution'));
   const sorted = [...findings].sort(
     (left, right) =>
-      CLASSES.indexOf(left.class) - CLASSES.indexOf(right.class) || right.severity - left.severity,
+      right.severity - left.severity || CLASSES.indexOf(left.class) - CLASSES.indexOf(right.class),
   );
   return (
     <div className="rounded-xl bg-sunken px-4 py-3 text-[14.5px] leading-snug">

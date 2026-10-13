@@ -51,7 +51,7 @@ describe('MockEngineClient', () => {
 
     const { pid } = await client.sendRequest<{ pid: number }>('launch', {
       map: 'maps/Grundorf/global.cfg',
-      bus: 'Vehicles/Sample/Standard bus.bus',
+      bus: 'Vehicles/MAN/MAN SL200.bus',
       time: '09:00',
     });
     const listed = events.find((e) => e.case === 'instancesChanged');
@@ -110,7 +110,7 @@ describe('MockEngineClient', () => {
 
     const { pid } = await client.sendRequest<{ pid: number }>('launch', {
       map: 'maps/Grundorf/global.cfg',
-      bus: 'Vehicles/Sample/Standard bus.bus',
+      bus: 'Vehicles/MAN/MAN SL200.bus',
       time: '09:00',
     });
     await client.sendRequest('stop', { pid });

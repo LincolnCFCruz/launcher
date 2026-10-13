@@ -9,6 +9,8 @@
   "reading": "Inhaltsordner wird gelesen…",
   "loadFailed": "Der Inhaltsordner konnte nicht gelesen werden",
   "cleaned": "Reste einer abgebrochenen Installation entfernt",
+  "search": "Mods durchsuchen",
+  "noMatch": "Keine Mod passt zu „{query}“",
   "none": "Noch keine Mods installiert",
   "noneHint": "Installier eine mit dem Knopf links oder zieh ein Archiv hierher.",
   "inPlace": "direkt genutzt",

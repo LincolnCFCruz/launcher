@@ -122,8 +122,8 @@ function seedInstances(): Instance[] {
       slot,
       log: `C:\\Users\\player\\.neoomsi\\game${slot ? `-${slot}` : ''}.log`,
       started: BigInt(now() - 2820),
-      map: 'Westfeld 1989',
-      bus: 'Vehicles/Sample/Double-decker 1979.bus',
+      map: 'Berlin-Spandau 1989',
+      bus: 'Vehicles/MAN/MAN SD200 (SD80).bus',
       entry: 0,
       line: '92',
       tour: '3',
@@ -135,7 +135,7 @@ function seedInstances(): Instance[] {
   return [
     game(17840, 0, {
       lan: 'host',
-      lastLine: 'Line 92 → Rathaus Westfeld, 1 min late, 23 passengers on board',
+      lastLine: 'Line 92 → Rathaus Spandau, 1 min late, 23 passengers on board',
       lanStatus: {
         role: LanRole.HOST,
         name: CONFIG.profile,
@@ -145,49 +145,49 @@ function seedInstances(): Instance[] {
           {
             id: 1,
             name: CONFIG.profile,
-            bus: 'Vehicles/Sample/Double-decker 1979.bus',
+            bus: 'Vehicles/MAN/MAN SD200 (SD80).bus',
             line: '92',
-            destination: 'Rathaus Westfeld',
+            destination: 'Rathaus Spandau',
             passengers: 23,
             drawn: true,
           },
           {
             id: 2,
-            name: 'Robin',
-            bus: 'Vehicles/Sample/Double-decker 1985.bus',
+            name: 'Lena K.',
+            bus: 'Vehicles/MAN/MAN SD202 (D92).bus',
             line: '137',
-            destination: 'Stift',
+            destination: 'Johannesstift',
             passengers: 11,
             location: '1.2 km ahead',
             drawn: true,
           },
           {
             id: 3,
-            name: 'night_driver',
-            bus: 'Vehicles/Sample/Standard bus.bus',
+            name: 'busfahrer_ole',
+            bus: 'Vehicles/MAN/MAN SL200.bus',
             passengers: 0,
             location: '3.4 km behind',
             drawn: false,
           },
         ],
         chat: [
-          'Robin: Bin in 5 Minuten am Rathaus',
-          'night_driver: kurz Pause, Kaffee',
+          'Lena K.: Bin in 5 Minuten am Rathaus',
+          'busfahrer_ole: kurz Pause, Kaffee',
           `${CONFIG.profile}: Alles klar, ich warte an der Wendeschleife`,
         ],
         warnings: [
-          'night_driver is missing the map "Westfeld 1989" v1.3 and sees an older version',
+          'busfahrer_ole is missing the map "Berlin-Spandau 1989" v1.3 and sees an older version',
         ],
         connected: true,
         hostName: CONFIG.profile,
-        map: 'maps/Westfeld/global.cfg',
+        map: 'maps/Berlin-Spandau/global.cfg',
       },
     }),
     game(17112, 1, {
       started: BigInt(now() - 5400),
       processStarted: BigInt(now() - 5400),
       map: 'Grundorf',
-      bus: 'Vehicles/Sample/Low-floor bus.bus',
+      bus: 'Vehicles/MAN/MAN NL202.bus',
       line: '24',
       tour: '2',
       running: false,
@@ -199,7 +199,7 @@ function seedInstances(): Instance[] {
       started: BigInt(now() - 7800),
       processStarted: BigInt(now() - 7800),
       map: 'Neuhausen',
-      bus: 'Vehicles/CityBus2000/CityBus2000.bus',
+      bus: 'Vehicles/O530/O530.bus',
       line: undefined,
       tour: undefined,
       running: false,
@@ -402,7 +402,7 @@ export class MockLauncher {
     mapPicture: () => new Uint8Array(),
     preflight: ({ map }) =>
       create(DiagnosticListSchema, {
-        findings: map === 'maps/Westfeld/global.cfg' ? this.findings() : [],
+        findings: map === 'maps/Berlin-Spandau/global.cfg' ? this.findings() : [],
       }),
     dismissDiagnostic: ({ key }) => {
       this.dismissed.add(key ?? '');
@@ -412,7 +412,7 @@ export class MockLauncher {
     situations: ({ map }) =>
       create(SituationListSchema, {
         situations:
-          map === 'maps/Westfeld/global.cfg'
+          map === 'maps/Berlin-Spandau/global.cfg'
             ? [{ name: 'Line 92, tour 2', file: 'laststn.osn', time: BigInt(now() - 7200) }]
             : [],
       }),
@@ -510,7 +510,7 @@ export class MockLauncher {
     const until = Number(instance.ended ?? secs());
     const ticks = Math.min(400, Math.floor((until - started) / 3));
     const events = [
-      'INFO  stop "Rathaus Westfeld": 14 in, 9 out',
+      'INFO  stop "Rathaus Spandau": 14 in, 9 out',
       'INFO  ticket sold: single fare 2.70',
       'INFO  timetable: 1 min 20 s late at "Altstadtring"',
       'WARN  spline 1184 has no neighbour at its end, AI traffic turns back',
@@ -539,8 +539,8 @@ export class MockLauncher {
     const value = text.trim();
     if (/^OMSI(-[A-Z0-9]{4}){2,}$/.test(value.toUpperCase())) {
       return {
-        ...create(JoinCheckSchema, { ok: true, text: 'The host drives on Westfeld 1989' }),
-        map: 'maps/Westfeld/global.cfg',
+        ...create(JoinCheckSchema, { ok: true, text: 'The host drives on Berlin-Spandau 1989' }),
+        map: 'maps/Berlin-Spandau/global.cfg',
       };
     }
     const address = value.match(
@@ -567,12 +567,12 @@ export class MockLauncher {
     return [
       {
         class: DiagnosticClass.MISSING_DEPENDENCY,
-        requester: 'Westfeld_1989',
-        pack: 'Sceneryobjects/Westfeld_Haltestellen',
+        requester: 'Berlin-Spandau_1989',
+        pack: 'Sceneryobjects/Spandau_Haltestellen',
         severity: Severity.REQUIRED,
         count: 12,
-        samples: ['Sceneryobjects/Westfeld_Haltestellen/hst.sco'],
-        key: 'westfeld-hst',
+        samples: ['Sceneryobjects/Spandau_Haltestellen/hst.sco'],
+        key: 'spandau-hst',
       },
     ].filter((finding) => !this.dismissed.has(finding.key));
   }

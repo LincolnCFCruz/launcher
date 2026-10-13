@@ -36,9 +36,9 @@ const list = <D extends DescMessage>(schema: D, items: MessageInitShape<D>[]) =>
   items.map((item) => create(schema, item));
 
 export const CONFIG = {
-  root: 'C:\\Games\\OMSI 2',
+  root: 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\OMSI 2',
   game: 'neoomsi.exe',
-  profile: 'Sample Driver',
+  profile: 'Jakob Weber',
 };
 
 export const MAPS = list(MapInfoSchema, [
@@ -57,16 +57,16 @@ export const MAPS = list(MapInfoSchema, [
     installed: true,
   },
   {
-    name: 'Westfeld',
-    friendly: 'Westfeld 1989',
-    file: 'maps/Westfeld/global.cfg',
+    name: 'Berlin-Spandau',
+    friendly: 'Berlin-Spandau 1989',
+    file: 'maps/Berlin-Spandau/global.cfg',
     description:
-      'A fictional city in 1989: double-decker lines around the old town, with full timetables.',
+      'West Berlin in 1989: the double-decker lines around the Spandau old town, with real timetables.',
     entryPoints: [
-      { index: 0, name: 'Betriebshof Westfeld' },
-      { index: 1, name: 'Rathaus Westfeld' },
+      { index: 0, name: 'Betriebshof Spandau' },
+      { index: 1, name: 'Rathaus Spandau' },
     ],
-    hof: 'Westfeld 1989.hof',
+    hof: 'Spandau 1989.hof',
     installed: true,
   },
   {
@@ -90,7 +90,7 @@ const vehicle = (
     description: '',
     defaultPaint: 'Default paint',
     paints: ['Default paint'],
-    hofs: ['Grundorf.hof', 'Westfeld 1989.hof'],
+    hofs: ['Grundorf.hof', 'Spandau 1989.hof'],
     installed: false,
     missingPacks: [],
     numbers: [],
@@ -99,75 +99,75 @@ const vehicle = (
 
 export const VEHICLES = [
   vehicle({
-    name: 'Double-decker 1979',
-    manufacturer: 'Sample',
-    typeName: 'Double-decker 1979',
-    description: 'A double-decker of the late 1970s: two doors, 4-speed automatic.',
-    defaultPaint: 'City beige',
-    paints: ['City beige', 'City beige (advert)', 'Grundorf white', 'Jubilee'],
+    name: 'MAN SD200 (SD80)',
+    manufacturer: 'MAN',
+    typeName: 'SD200 (SD80)',
+    description: 'The Berlin double-decker of the late 1970s: two doors, 4-speed automatic.',
+    defaultPaint: 'BVG beige',
+    paints: ['BVG beige', 'BVG beige (advert "Pop")', 'Grundorf white', 'Spandau jubilee'],
     numbers: [
-      { number: '2401', plate: 'WF-B 2401' },
-      { number: '2417', plate: 'WF-B 2417' },
-      { number: '2452', plate: 'WF-B 2452' },
+      { number: '2401', plate: 'B-V 2401' },
+      { number: '2417', plate: 'B-V 2417' },
+      { number: '2452', plate: 'B-V 2452' },
     ],
   }),
   vehicle({
-    name: 'Double-decker 1985',
-    manufacturer: 'Sample',
-    typeName: 'Double-decker 1985',
-    description: 'The 1985 successor with a lower floor and a new livery.',
-    defaultPaint: 'City beige',
-    paints: ['City beige', 'City corporate'],
+    name: 'MAN SD202 (D92)',
+    manufacturer: 'MAN',
+    typeName: 'SD202 (D92)',
+    description: 'The 1985 successor with a lower floor and the new BVG livery.',
+    defaultPaint: 'BVG beige',
+    paints: ['BVG beige', 'BVG corporate'],
     numbers: [
-      { number: '3001', plate: 'WF-B 3001' },
-      { number: '3018', plate: 'WF-B 3018' },
+      { number: '3001', plate: 'B-V 3001' },
+      { number: '3018', plate: 'B-V 3018' },
     ],
   }),
   vehicle({
-    name: 'Standard bus',
-    manufacturer: 'Sample',
-    typeName: 'Standard bus',
+    name: 'MAN SL200',
+    manufacturer: 'MAN',
+    typeName: 'SL200',
     description: 'The standard city single-decker, manual or automatic gearbox.',
     defaultPaint: 'Grundorf white',
-    paints: ['Grundorf white', 'Classic green', 'Harbour red'],
+    paints: ['Grundorf white', 'VÖV green', 'Hamburg red'],
   }),
   vehicle({
-    name: 'Low-floor bus',
-    manufacturer: 'Sample',
-    typeName: 'Low-floor bus (2-door)',
+    name: 'MAN NL202',
+    manufacturer: 'MAN',
+    typeName: 'NL202 (2-door)',
     description: 'Low-floor single-decker of the early 1990s.',
     defaultPaint: 'Grundorf white',
     paints: ['Grundorf white', 'Neuhausen yellow', 'Regional blue', 'Plain white', 'Red', 'Advert'],
   }),
   vehicle({
-    name: 'City bus 2000',
-    manufacturer: 'Community',
-    typeName: 'City bus 2000',
-    file: 'Vehicles/CityBus2000/CityBus2000.bus',
-    folder: 'CityBus2000',
-    description: 'A community repaint pack of a modern city bus.',
+    name: 'Mercedes-Benz O 530',
+    manufacturer: 'Mercedes-Benz',
+    typeName: 'O 530 Citaro',
+    file: 'Vehicles/O530/O530.bus',
+    folder: 'O530',
+    description: 'A community repaint pack of the first Citaro generation.',
     installed: true,
     defaultPaint: 'Factory white',
     paints: ['Factory white', 'Neuhausen yellow'],
-    missingPacks: ['City bus sound pack 2.1'],
+    missingPacks: ['Citaro sound pack 2.1'],
   }),
   vehicle({
-    name: 'Regional bus',
-    manufacturer: 'Community',
-    typeName: 'Regional bus',
-    file: 'Vehicles/RegionalBus/RegionalBus.bus',
-    folder: 'RegionalBus',
-    description: 'A regional single-decker with a big windscreen.',
+    name: 'Neoplan N 4016',
+    manufacturer: 'Neoplan',
+    typeName: 'N 4016',
+    file: 'Vehicles/N4016/N4016.bus',
+    folder: 'N4016',
+    description: 'Centroliner predecessor with the characteristic big windscreen.',
     installed: true,
     paints: ['Default paint', 'Regional blue'],
   }),
   vehicle({
-    name: 'Low-entry bus',
-    manufacturer: 'Community',
-    typeName: 'Low-entry bus',
-    file: 'Vehicles/LowEntry/LowEntry.bus',
-    folder: 'LowEntry',
-    description: 'A low-entry single-decker.',
+    name: 'Volvo 7700',
+    manufacturer: 'Volvo',
+    typeName: '7700',
+    file: 'Vehicles/Volvo7700/7700.bus',
+    folder: 'Volvo7700',
+    description: 'Swedish low-floor single-decker.',
     installed: true,
   }),
 ];
@@ -290,16 +290,16 @@ const LINE_DEFS: Record<string, LineDef[]> = {
       aiOnly: true,
     },
   ],
-  Westfeld: [
+  'Berlin-Spandau': [
     {
       name: '92',
       stops: [
-        'Rathaus Westfeld',
-        'Altstadt Westfeld',
-        'Kanalplatz',
-        'Uferallee',
-        'Stift',
-        'Nordhafen',
+        'Rathaus Spandau',
+        'Altstadt Spandau',
+        'Falkenseer Platz',
+        'Neuendorfer Allee',
+        'Johannesstift',
+        'Hakenfelde',
       ],
       minutes: 4,
       tours: 6,
@@ -311,7 +311,7 @@ const LINE_DEFS: Record<string, LineDef[]> = {
     },
     {
       name: '137',
-      stops: ['Rathaus Westfeld', 'Gartenstraße', 'Stadtpark', 'Am Omnibushof'],
+      stops: ['Rathaus Spandau', 'Seegefelder Straße', 'Wröhmännerpark', 'Am Omnibushof'],
       minutes: 5,
       tours: 3,
       firstDeparture: 5 * 3600 + 20 * 60,
@@ -322,7 +322,7 @@ const LINE_DEFS: Record<string, LineDef[]> = {
     },
     {
       name: '13N',
-      stops: ['Rathaus Westfeld', 'Altstadt Westfeld', 'Zitadelle', 'Heideweg'],
+      stops: ['Rathaus Spandau', 'Altstadt Spandau', 'Zitadelle', 'Haselhorst'],
       minutes: 4,
       tours: 2,
       firstDeparture: 0 * 3600 + 15 * 60,
@@ -521,54 +521,54 @@ function run(
   });
 }
 
-export const PROFILES = ['Sample Driver', 'Test Driver'];
+export const PROFILES = ['Jakob Weber', 'Testfahrer'];
 
-const WESTFELD = 'Westfeld 1989';
-const DD1979 = 'Vehicles/Sample/Double-decker 1979.bus';
-const DD1985 = 'Vehicles/Sample/Double-decker 1985.bus';
-const LOW_FLOOR = 'Vehicles/Sample/Low-floor bus.bus';
-const STANDARD = 'Vehicles/Sample/Standard bus.bus';
+const SPANDAU = 'Berlin-Spandau 1989';
+const SD200 = 'Vehicles/MAN/MAN SD200 (SD80).bus';
+const SD202 = 'Vehicles/MAN/MAN SD202 (D92).bus';
+const NL202 = 'Vehicles/MAN/MAN NL202.bus';
+const SL200 = 'Vehicles/MAN/MAN SL200.bus';
 
 const RUNS: Record<string, () => Session[]> = {
-  'Sample Driver': () => [
-    run(2 * HOUR, WESTFELD, DD1979, '92', 31.4, 96, { early: 0, late: 4, tour: '3' }),
-    run(26 * HOUR, 'Grundorf', LOW_FLOOR, '24', 12.8, 44, { crashes: 1, driving: 71, jolts: 9 }),
-    run(50 * HOUR, 'Grundorf', STANDARD, undefined, 6.1, 22, {
+  'Jakob Weber': () => [
+    run(2 * HOUR, SPANDAU, SD200, '92', 31.4, 96, { early: 0, late: 4, tour: '3' }),
+    run(26 * HOUR, 'Grundorf', NL202, '24', 12.8, 44, { crashes: 1, driving: 71, jolts: 9 }),
+    run(50 * HOUR, 'Grundorf', SL200, undefined, 6.1, 22, {
       stops: 0,
       early: 0,
       late: 0,
       tickets: 0,
       cash: 0,
     }),
-    run(73 * HOUR, WESTFELD, DD1985, '137', 22.0, 71, { early: 3, late: 0, comfort: 88 }),
-    run(97 * HOUR, WESTFELD, DD1979, '92', 28.7, 88, { late: 6, ticketing: 81 }),
-    run(121 * HOUR, 'Neuhausen', 'Vehicles/CityBus2000/CityBus2000.bus', '501', 18.2, 58, {
+    run(73 * HOUR, SPANDAU, SD202, '137', 22.0, 71, { early: 3, late: 0, comfort: 88 }),
+    run(97 * HOUR, SPANDAU, SD200, '92', 28.7, 88, { late: 6, ticketing: 81 }),
+    run(121 * HOUR, 'Neuhausen', 'Vehicles/O530/O530.bus', '501', 18.2, 58, {
       hurt: 1,
       crashes: 1,
       driving: 54,
     }),
-    run(170 * HOUR, 'Grundorf', LOW_FLOOR, '36', 9.4, 33, { early: 0, late: 0 }),
-    run(195 * HOUR, WESTFELD, DD1985, '13N', 24.9, 77, { tour: '1', comfort: 92, driving: 91 }),
-    run(242 * HOUR, 'Grundorf', STANDARD, '24', 13.1, 47),
-    run(290 * HOUR, WESTFELD, DD1979, '137', 21.6, 69, { late: 5, jolts: 6 }),
-    run(338 * HOUR, 'Neuhausen', 'Vehicles/RegionalBus/RegionalBus.bus', undefined, 4.3, 15, {
+    run(170 * HOUR, 'Grundorf', NL202, '36', 9.4, 33, { early: 0, late: 0 }),
+    run(195 * HOUR, SPANDAU, SD202, '13N', 24.9, 77, { tour: '1', comfort: 92, driving: 91 }),
+    run(242 * HOUR, 'Grundorf', SL200, '24', 13.1, 47),
+    run(290 * HOUR, SPANDAU, SD200, '137', 21.6, 69, { late: 5, jolts: 6 }),
+    run(338 * HOUR, 'Neuhausen', 'Vehicles/N4016/N4016.bus', undefined, 4.3, 15, {
       stops: 0,
       early: 0,
       late: 0,
       tickets: 0,
       cash: 0,
     }),
-    run(410 * HOUR, 'Grundorf', LOW_FLOOR, 'N7', 11.0, 39, { early: 2 }),
+    run(410 * HOUR, 'Grundorf', NL202, 'N7', 11.0, 39, { early: 2 }),
   ],
-  'Test Driver': () => [
-    run(30 * HOUR, 'Grundorf', LOW_FLOOR, '24', 7.9, 31, {
-      driver: 'Test Driver',
+  Testfahrer: () => [
+    run(30 * HOUR, 'Grundorf', NL202, '24', 7.9, 31, {
+      driver: 'Testfahrer',
       late: 3,
       driving: 62,
       crashes: 2,
     }),
-    run(220 * HOUR, 'Grundorf', STANDARD, undefined, 3.2, 12, {
-      driver: 'Test Driver',
+    run(220 * HOUR, 'Grundorf', SL200, undefined, 3.2, 12, {
+      driver: 'Testfahrer',
       stops: 0,
       early: 0,
       late: 0,
@@ -628,11 +628,11 @@ export function profile(name: string): Profile {
 }
 
 const MOD_ENTRIES: [string, number, number, boolean?][] = [
-  ['CityBus2000_Facelift', 3 * HOUR, 0],
-  ['Westfeld_1989', 12 * 24 * HOUR, 0],
+  ['MB_O530_Citaro_Facelift', 3 * HOUR, 0],
+  ['Berlin-Spandau_1989', 12 * 24 * HOUR, 0],
   ['Neuhausen_v1.4.zip', 9 * 24 * HOUR, 812_000_000],
-  ['LowFloor_Repaints', 30 * 24 * HOUR, 0, true],
-  ['Electric_Bus.zip', 5 * 24 * HOUR, 918_000_000],
+  ['MAN_NL202', 30 * 24 * HOUR, 0, true],
+  ['Volvo_7900_Electric.zip', 5 * 24 * HOUR, 918_000_000],
   ['Grundorf_Haltestellen', 41 * 24 * HOUR, 0],
 ];
 
@@ -664,8 +664,8 @@ export const MODS: ModsStatus = create(ModsStatusSchema, {
   jobs: [
     {
       id: 3n,
-      source: 'C:\\Users\\player\\Downloads\\Articulated_Bus_2020.zip',
-      name: 'Articulated_Bus_2020',
+      source: 'C:\\Users\\player\\Downloads\\MAN_Lion_City_G_2020.zip',
+      name: 'MAN_Lion_City_G_2020',
       state: InstallState.COPYING,
       mode: InstallMode.EXTRACT,
       filesDone: 142n,
@@ -674,7 +674,7 @@ export const MODS: ModsStatus = create(ModsStatusSchema, {
       bytesTotal: 1_380_000_000n,
       freeBytes: 214_000_000_000n,
       neededBytes: 2_454_000_000n,
-      message: 'installing Articulated_Bus_2020 into the mods folder',
+      message: 'installing MAN_Lion_City_G_2020 into the mods folder',
       started: BigInt(now() - 20),
     },
     {
@@ -694,8 +694,8 @@ export const MODS: ModsStatus = create(ModsStatusSchema, {
     },
     {
       id: 1n,
-      source: 'C:\\Users\\player\\Downloads\\CityBus2000_Facelift.zip',
-      name: 'CityBus2000_Facelift.zip',
+      source: 'C:\\Users\\player\\Downloads\\MB_O530_Citaro_Facelift.zip',
+      name: 'MB_O530_Citaro_Facelift.zip',
       state: InstallState.DONE,
       mode: InstallMode.EXTRACT,
       filesDone: 184n,
@@ -704,9 +704,9 @@ export const MODS: ModsStatus = create(ModsStatusSchema, {
       bytesTotal: 96_000_000n,
       freeBytes: 214_000_000_000n,
       neededBytes: 1_170_000_000n,
-      message: 'installed as mods/CityBus2000_Facelift',
-      report: ['installed as mods/CityBus2000_Facelift'],
-      installed: ['mods/CityBus2000_Facelift'],
+      message: 'installed as mods/MB_O530_Citaro_Facelift',
+      report: ['installed as mods/MB_O530_Citaro_Facelift'],
+      installed: ['mods/MB_O530_Citaro_Facelift'],
       started: BigInt(now() - 3 * HOUR),
       finished: BigInt(now() - 3 * HOUR + 40),
     },
@@ -717,7 +717,7 @@ export const TUTORIALS = list(TutorialSchema, [
   {
     number: 1,
     title: 'Starting the bus',
-    text: 'You are sitting in the cab of a double-decker at the depot in Grundorf. This lesson shows you how to bring a cold bus to life.\n• Switch on the battery with the main switch to the left of the seat.\n• Turn the ignition key and wait until the warning lamps go out.\n• Start the engine and let the air pressure build up to 8 bar.\n• Release the parking brake and select D on the gear selector.\nWhen the bus rolls, the lesson is done.',
+    text: 'You are sitting in the cab of a MAN SD200 at the depot in Grundorf. This lesson shows you how to bring a cold bus to life.\n• Switch on the battery with the main switch to the left of the seat.\n• Turn the ignition key and wait until the warning lamps go out.\n• Start the engine and let the air pressure build up to 8 bar.\n• Release the parking brake and select D on the gear selector.\nWhen the bus rolls, the lesson is done.',
   },
   {
     number: 2,
@@ -742,18 +742,18 @@ export const SERVERS = list(ServerInfoSchema, [
     name: 'neoOMSI Official',
     official: true,
     motd: 'Be nice, drive to the timetable.',
-    map: 'Westfeld 1989',
+    map: 'Berlin-Spandau 1989',
     time: '07:42',
     weather: 'Overcast',
     players: 18,
     maxPlayers: 32,
   },
   {
-    address: '203.0.113.17:7777',
-    name: 'Westfeld Stammtisch',
+    address: '85.214.20.17:7777',
+    name: 'Spandau Stammtisch',
     official: false,
     motd: 'Every Thursday from 20:00',
-    map: 'Westfeld 1989',
+    map: 'Berlin-Spandau 1989',
     time: '21:10',
     weather: 'Clear',
     players: 4,
@@ -771,11 +771,11 @@ export const SERVERS = list(ServerInfoSchema, [
     maxPlayers: 10,
   },
   {
-    address: 'nightbus.example.org:7777',
-    name: 'Night Owls',
+    address: 'hh-bus.de:7777',
+    name: 'Hamburg Nachtbus',
     official: false,
     motd: 'Night lines only, from 23:00.',
-    map: 'maps/Harbourside/global.cfg',
+    map: 'maps/Hamburg-Dammtor/global.cfg',
     time: '23:48',
     weather: 'Light rain',
     players: 2,
@@ -797,7 +797,7 @@ export const SERVERS = list(ServerInfoSchema, [
 
 export const CONTROLLERS = list(ControllerSchema, [
   {
-    name: 'Racing Wheel',
+    name: 'Logitech G923 Racing Wheel',
     connected: true,
     enabled: true,
     deadzone: 0.02,
@@ -852,7 +852,7 @@ export const CONTROLLERS = list(ControllerSchema, [
     ],
   },
   {
-    name: 'Pedal Set',
+    name: 'Fanatec ClubSport Pedals V3',
     connected: true,
     enabled: true,
     deadzone: 0.04,
@@ -883,7 +883,7 @@ export const CONTROLLERS = list(ControllerSchema, [
     buttons: [],
   },
   {
-    name: 'Gamepad',
+    name: 'Xbox Wireless Controller',
     connected: true,
     enabled: false,
     deadzone: 0.12,
@@ -944,7 +944,7 @@ export const CONTROLLERS = list(ControllerSchema, [
     ],
   },
   {
-    name: 'Gear Shifter',
+    name: 'Thrustmaster TH8A Shifter',
     connected: false,
     enabled: true,
     deadzone: 0,
